@@ -74,6 +74,10 @@ const elements = {
   dbMessagesCount: document.querySelector("#db-messages-count"),
   dbBookingsCount: document.querySelector("#db-bookings-count"),
   dbNotificationsCount: document.querySelector("#db-notifications-count"),
+  authBackendBadge: document.querySelector("#auth-backend-badge"),
+  authBackendText: document.querySelector("#auth-backend-text"),
+  firebaseStageBadge: document.querySelector("#firebase-stage-badge"),
+  firebaseStageText: document.querySelector("#firebase-stage-text"),
   dbCodesCount: document.querySelector("#db-codes-count"),
   adminCodesCount: document.querySelector("#admin-codes-count"),
   adminUsersCount: document.querySelector("#admin-users-count"),
@@ -138,6 +142,137 @@ function loadUsers() {
 function toPublicUser(user) {
   const { password, ...publicUser } = user;
   return publicUser;
+}
+
+
+function isFirebaseAuth() {
+  return Boolean(window.MyFitClubFirebase?.isEnabled?.());
+}
+
+function syncUserToLocalStore(publicUser) {
+  const users = loadUsers();
+  const existingIndex = users.findIndex(
+    (candidate) => candidate.id === publicUser.id || candidate.email === publicUser.email,
+  );
+  const record = {
+    ...publicUser,
+    password: "",
+  };
+
+  if (existingIndex >= 0) {
+    users[existingIndex] = { ...users[existingIndex], ...record };
+  } else {
+    users.push(record);
+  }
+
+  saveUsers(users);
+}
+
+function renderAuthBackendInfo() {
+  if (!elements.authBackendBadge) {
+    return;
+  }
+
+  if (isFirebaseAuth()) {
+    elements.authBackendBadge.textContent = "Firebase";
+    elements.authBackendText.textContent =
+      "Вход и регистрация работают через Firebase. Один аккаунт открывается на телефоне и компьютере.";
+    elements.firebaseStageBadge.textContent = "включено";
+    elements.firebaseStageText.textContent =
+      "Облачный вход активен. Следующий шаг — перенести чаты и расписание в Firestore (этап 3).";
+    return;
+  }
+
+  elements.authBackendBadge.textContent = "локально";
+  elements.authBackendText.textContent =
+    "Роль назначается пригласительным кодом. Аккаунты и пароли хранятся только в этом браузере.";
+  elements.firebaseStageBadge.textContent = "этап 2";
+  elements.firebaseStageText.textContent =
+    "Firebase подготовлен в коде. Чтобы включить общий вход, настройте firebase-config.js (см. docs/firebase-setup.md).";
+}
+
+function validateSignupInvite(code) {
+  const storedInvite = getInviteByCode(code);
+
+  if (!storedInvite) {
+    return {
+      ok: false,
+      message:
+        "Неверный пригласительный код. Попробуйте CLIENT2026, TRAINER2026 или ADMIN2026.",
+    };
+  }
+
+  if (storedInvite.usedCount >= storedInvite.usageLimit) {
+    return {
+      ok: false,
+      message:
+        "Лимит этого пригласительного кода исчерпан. Нужен новый код от администратора.",
+    };
+  }
+
+  return { ok: true, storedInvite };
+}
+
+function consumeInviteCode(code) {
+  MyFitClubStore.update((db) => {
+    db.invitationCodes = db.invitationCodes.map((inviteCode) =>
+      inviteCode.code === code
+        ? { ...inviteCode, usedCount: inviteCode.usedCount + 1 }
+        : inviteCode,
+    );
+  });
+}
+
+async function loginWithFirebase(email, password) {
+  const authUser = await window.MyFitClubFirebase.signIn(email, password);
+  const profile = await window.MyFitClubFirebase.getUserProfile(authUser.uid);
+
+  if (!profile) {
+    await window.MyFitClubFirebase.signOut();
+    return {
+      ok: false,
+      message:
+        "Профиль не найден. Зарегистрируйтесь по пригласительному коду на вкладке «Регистрация».",
+    };
+  }
+
+  const publicUser = toPublicUser(profile);
+  syncUserToLocalStore(publicUser);
+  saveSession(publicUser);
+  enterApp(publicUser);
+  return { ok: true };
+}
+
+async function signupWithFirebase({ name, email, password, code }) {
+  const inviteCheck = validateSignupInvite(code);
+
+  if (!inviteCheck.ok) {
+    return inviteCheck;
+  }
+
+  const invitePreset = inviteCodes[code];
+  const authUser = await window.MyFitClubFirebase.signUp(email, password);
+  const profile = createUser({ name, email, password: "", code });
+  profile.id = authUser.uid;
+  profile.name = name || invitePreset?.defaultName || profile.name;
+
+  await window.MyFitClubFirebase.saveUserProfile(authUser.uid, {
+    name: profile.name,
+    email: profile.email,
+    code: profile.code,
+    role: profile.role,
+    roleName: profile.roleName,
+    label: profile.label,
+    createdAt: profile.createdAt,
+  });
+
+  consumeInviteCode(code);
+  const publicUser = toPublicUser(profile);
+  syncUserToLocalStore(publicUser);
+  elements.authSuccess.textContent = "Аккаунт создан в Firebase. Входим в MyFitClub...";
+  saveSession(publicUser);
+  enterApp(publicUser);
+  return { ok: true };
 }
 
 function getRoleName(role) {
@@ -235,10 +370,19 @@ function enterApp(user) {
   elements.adminPanel.classList.toggle("hidden", user.role !== "admin");
 
   renderClubMessages();
+  renderAuthBackendInfo();
   refreshAppData();
 }
 
-function resetDemo() {
+async function resetDemo() {
+  if (isFirebaseAuth()) {
+    try {
+      await window.MyFitClubFirebase.signOut();
+    } catch (error) {
+      console.warn("Firebase signOut failed", error);
+    }
+  }
+
   localStorage.removeItem(SESSION_STORAGE_KEY);
   state.currentUser = null;
   elements.appScreen.classList.add("hidden");
@@ -524,7 +668,7 @@ function activateView(viewName) {
   });
 }
 
-elements.authForm.addEventListener("submit", (event) => {
+elements.authForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   elements.authError.textContent = "";
   elements.authSuccess.textContent = "";
@@ -535,6 +679,44 @@ elements.authForm.addEventListener("submit", (event) => {
 
   if (!email || !password) {
     elements.authError.textContent = "Введите email и пароль.";
+    return;
+  }
+
+  if (isFirebaseAuth()) {
+    elements.authSubmit.disabled = true;
+
+    try {
+      if (state.authMode === "login") {
+        const result = await loginWithFirebase(email, password);
+        if (!result.ok) {
+          elements.authError.textContent = result.message;
+        }
+        return;
+      }
+
+      const code = normalizeCode(elements.inviteCode.value);
+      const inviteCheck = validateSignupInvite(code);
+
+      if (!inviteCheck.ok) {
+        elements.authError.textContent = inviteCheck.message;
+        return;
+      }
+
+      const name =
+        elements.memberName.value.trim() ||
+        inviteCodes[code]?.defaultName ||
+        "Участник";
+
+      const signupResult = await signupWithFirebase({ name, email, password, code });
+      if (!signupResult.ok) {
+        elements.authError.textContent = signupResult.message;
+      }
+    } catch (error) {
+      elements.authError.textContent = window.MyFitClubFirebase.mapAuthError(error);
+    } finally {
+      elements.authSubmit.disabled = false;
+    }
+
     return;
   }
 
@@ -556,17 +738,10 @@ elements.authForm.addEventListener("submit", (event) => {
   }
 
   const code = normalizeCode(elements.inviteCode.value);
-  const storedInvite = getInviteByCode(code);
+  const inviteCheck = validateSignupInvite(code);
 
-  if (!storedInvite) {
-    elements.authError.textContent =
-      "Неверный пригласительный код. Попробуйте CLIENT2026, TRAINER2026 или ADMIN2026.";
-    return;
-  }
-
-  if (storedInvite.usedCount >= storedInvite.usageLimit) {
-    elements.authError.textContent =
-      "Лимит этого пригласительного кода исчерпан. Нужен новый код от администратора.";
+  if (!inviteCheck.ok) {
+    elements.authError.textContent = inviteCheck.message;
     return;
   }
 
@@ -576,17 +751,12 @@ elements.authForm.addEventListener("submit", (event) => {
     return;
   }
 
-  const name = elements.memberName.value.trim() || invite.defaultName;
+  const name =
+    elements.memberName.value.trim() || inviteCodes[code]?.defaultName || "Участник";
   const user = createUser({ name, email, password, code });
   users.push(user);
   saveUsers(users);
-  MyFitClubStore.update((db) => {
-    db.invitationCodes = db.invitationCodes.map((inviteCode) =>
-      inviteCode.code === code
-        ? { ...inviteCode, usedCount: inviteCode.usedCount + 1 }
-        : inviteCode,
-    );
-  });
+  consumeInviteCode(code);
 
   const publicUser = toPublicUser(user);
   elements.authSuccess.textContent = "Аккаунт создан. Входим в MyFitClub...";
@@ -798,19 +968,47 @@ elements.onboardingDots.querySelectorAll(".dot").forEach((dot) => {
 
 elements.resetDemo.addEventListener("click", resetDemo);
 
-initOnboarding();
-seedDemoUsers();
-state.bookedScheduleIds = new Set(loadBookings());
-setAuthMode("signup");
-refreshAppData();
-elements.resetDemo.classList.add("hidden");
+async function bootstrap() {
+  initOnboarding();
+  renderAuthBackendInfo();
+  state.bookedScheduleIds = new Set(loadBookings());
+  setAuthMode("signup");
+  refreshAppData();
+  elements.resetDemo.classList.add("hidden");
 
-const savedUser = loadSession();
+  if (isFirebaseAuth()) {
+    try {
+      await window.MyFitClubFirebase.init();
+      const authUser = await window.MyFitClubFirebase.waitForAuthState();
 
-if (savedUser) {
-  completeOnboarding();
-  enterApp(savedUser);
+      if (authUser) {
+        const profile = await window.MyFitClubFirebase.getUserProfile(authUser.uid);
+
+        if (profile) {
+          const publicUser = toPublicUser(profile);
+          syncUserToLocalStore(publicUser);
+          completeOnboarding();
+          enterApp(publicUser);
+          return;
+        }
+      }
+    } catch (error) {
+      console.warn("Firebase bootstrap failed", error);
+      elements.authError.textContent =
+        "Firebase включён, но подключение не удалось. Проверьте firebase-config.js.";
+    }
+  } else {
+    seedDemoUsers();
+    const savedUser = loadSession();
+
+    if (savedUser) {
+      completeOnboarding();
+      enterApp(savedUser);
+    }
+  }
 }
+
+bootstrap();
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {

@@ -1,34 +1,19 @@
-# MyFitClub
+# desktop-tutorial — MyFitClub
 
-Закрытое приложение для фитнес-клуба: чаты, расписание, роли и клубное сообщество.
+Закрытое приложение фитнес-клуба (прототип) в папке **MyFitClub/**.
 
-## Открыть онлайн (этап 1)
+## Онлайн
 
-После настройки GitHub Pages приложение будет доступно по ссылке:
-
-```text
 https://prokli81.github.io/desktop-tutorial/
-```
 
-Подробная инструкция: `MyFitClub/docs/deployment.md`
+## Этапы
 
-## Важно
+1. GitHub Pages — ссылка в интернете (готово)
+2. Firebase Auth — общий вход (код готов, настройка: `MyFitClub/docs/firebase-setup.md`)
+3. Firestore — общие чаты (планируется)
 
-Сейчас репозиторий **приватный**. GitHub Pages на бесплатном плане работает только
-для **публичного** репозитория. Нужно один раз сделать репозиторий публичным в
-настройках GitHub (см. инструкцию в `MyFitClub/docs/deployment.md`).
+## Быстрый старт локально
 
-## Локально на компьютере
+Откройте `MyFitClub/index.html` в браузере.
 
-```bash
-cd MyFitClub
-python3 -m http.server 4173
-```
-
-Потом открыть `http://localhost:4173`
-
-## Документация
-
-- `MyFitClub/README.md` — описание прототипа
-- `MyFitClub/docs/deployment.md` — публикация в интернете
-- `MyFitClub/docs/design-system.md` — дизайн и экраны
+Демо: `anna@myfitclub.demo` / `fitclub`, коды `CLIENT2026`, `TRAINER2026`, `ADMIN2026`.

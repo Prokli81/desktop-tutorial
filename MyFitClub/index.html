@@ -531,22 +531,23 @@
             <div class="panel">
               <div class="panel-heading">
                 <h3>Настройки доступа</h3>
-                <span class="badge">по коду</span>
+                <span class="badge" id="auth-backend-badge">локально</span>
               </div>
-              <p>
+              <p id="auth-backend-text">
                 В этой демо-версии роль назначается пригласительным кодом:
-                клиент, тренер или администратор.
+                клиент, тренер или администратор. Данные сохраняются в браузере.
               </p>
             </div>
 
             <div class="panel">
               <div class="panel-heading">
-                <h3>Следующий этап</h3>
-                <span class="badge badge-blue">Firebase</span>
+                <h3>Облачный вход</h3>
+                <span class="badge badge-blue" id="firebase-stage-badge">этап 2</span>
               </div>
-              <p>
-                После прототипа сюда подключаются настоящая регистрация,
-                база данных, push-уведомления и мобильная упаковка для iOS/Android.
+              <p id="firebase-stage-text">
+                Firebase Authentication подключён в коде. Чтобы включить общий вход
+                для всех устройств, заполните firebase-config.js по инструкции
+                в docs/firebase-setup.md.
               </p>
             </div>
 
@@ -650,6 +651,11 @@
       </main>
     </div>
 
+    <script src="firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-bridge.js" defer></script>
     <script src="data-store.js" defer></script>
     <script src="app.js" defer></script>
   </body>
