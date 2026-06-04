@@ -391,22 +391,71 @@
               </div>
               <div class="admin-grid">
                 <article>
-                  <strong>3</strong>
+                  <strong id="admin-codes-count">0</strong>
                   активных кода
                 </article>
                 <article>
-                  <strong>128</strong>
+                  <strong id="admin-users-count">0</strong>
                   пользователей
                 </article>
                 <article>
-                  <strong>9</strong>
+                  <strong id="admin-schedule-count">0</strong>
                   занятий в расписании
                 </article>
               </div>
-              <div class="code-list" id="admin-code-list">
-                <span>CLIENT2026 -> клиент</span>
-                <span>TRAINER2026 -> тренер</span>
-                <span>ADMIN2026 -> администратор</span>
+
+              <div class="admin-section-grid">
+                <article class="admin-section-card">
+                  <div class="panel-heading">
+                    <h3>Пригласительные коды</h3>
+                    <span class="badge">доступ</span>
+                  </div>
+                  <form class="admin-form" id="admin-code-form">
+                    <input id="admin-code-input" type="text" placeholder="Например VIP2026" required />
+                    <select id="admin-code-role">
+                      <option value="client">Клиент</option>
+                      <option value="trainer">Тренер</option>
+                      <option value="admin">Администратор</option>
+                    </select>
+                    <input id="admin-code-limit" type="number" min="1" value="10" aria-label="Лимит использований" />
+                    <button class="secondary-button" type="submit">Создать код</button>
+                  </form>
+                  <div class="code-list" id="admin-code-list"></div>
+                </article>
+
+                <article class="admin-section-card">
+                  <div class="panel-heading">
+                    <h3>Пользователи</h3>
+                    <span class="badge badge-blue">роли</span>
+                  </div>
+                  <div class="admin-list" id="admin-user-list"></div>
+                </article>
+
+                <article class="admin-section-card">
+                  <div class="panel-heading">
+                    <h3>Новая группа</h3>
+                    <span class="badge">чат</span>
+                  </div>
+                  <form class="admin-form" id="admin-group-form">
+                    <input id="admin-group-title" type="text" placeholder="Название группы" required />
+                    <input id="admin-group-description" type="text" placeholder="Описание" required />
+                    <button class="secondary-button" type="submit">Создать группу</button>
+                  </form>
+                </article>
+
+                <article class="admin-section-card">
+                  <div class="panel-heading">
+                    <h3>Новое занятие</h3>
+                    <span class="badge badge-blue">расписание</span>
+                  </div>
+                  <form class="admin-form" id="admin-schedule-form">
+                    <input id="admin-event-title" type="text" placeholder="Название" required />
+                    <input id="admin-event-trainer" type="text" placeholder="Тренер" required />
+                    <input id="admin-event-place" type="text" placeholder="Зал" required />
+                    <input id="admin-event-date" type="text" placeholder="Например Пн, 19:00" required />
+                    <button class="secondary-button" type="submit">Добавить занятие</button>
+                  </form>
+                </article>
               </div>
             </div>
           </section>

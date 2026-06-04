@@ -15,7 +15,8 @@ backend API.
 - `messages`;
 - `clubMessages` - оставлено только для совместимости старого прототипа;
 - `bookings`;
-- `notifications`.
+- `notifications`;
+- `scheduleEvents`.
 
 На экране профиля есть блок **Локальная база прототипа**. Он показывает
 количество записей в основных коллекциях.
@@ -88,6 +89,20 @@ backend API.
 - `userId`;
 - `scheduleId`;
 - `createdAt`.
+
+### scheduleEvents
+
+Назначение: расписание занятий клуба.
+
+Поля:
+
+- `id`;
+- `title`;
+- `trainer`;
+- `place`;
+- `date`;
+- `description`;
+- `capacity`.
 
 ### notifications
 

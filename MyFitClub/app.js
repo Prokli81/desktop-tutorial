@@ -29,37 +29,6 @@ const state = {
   previousView: "club-chat",
 };
 
-const schedule = [
-  {
-    id: "functional-morning",
-    title: "Утренняя функциональная",
-    trainer: "Алексей Орлов",
-    place: "Зал 1",
-    date: "Пт, 08:00",
-  },
-  {
-    id: "yoga-mobility",
-    title: "Йога и мобильность",
-    trainer: "Мария Соколова",
-    place: "Зал 2",
-    date: "Пт, 18:00",
-  },
-  {
-    id: "strength-technique",
-    title: "Силовая техника",
-    trainer: "Алексей Орлов",
-    place: "Зал 1",
-    date: "Сб, 12:00",
-  },
-  {
-    id: "club-challenge",
-    title: "Клубный челлендж",
-    trainer: "Команда тренеров",
-    place: "Главный зал",
-    date: "Вс, 11:00",
-  },
-];
-
 const elements = {
   inviteScreen: document.querySelector("#invite-screen"),
   appScreen: document.querySelector("#app-screen"),
@@ -99,6 +68,23 @@ const elements = {
   dbBookingsCount: document.querySelector("#db-bookings-count"),
   dbNotificationsCount: document.querySelector("#db-notifications-count"),
   dbCodesCount: document.querySelector("#db-codes-count"),
+  adminCodesCount: document.querySelector("#admin-codes-count"),
+  adminUsersCount: document.querySelector("#admin-users-count"),
+  adminScheduleCount: document.querySelector("#admin-schedule-count"),
+  adminCodeForm: document.querySelector("#admin-code-form"),
+  adminCodeInput: document.querySelector("#admin-code-input"),
+  adminCodeRole: document.querySelector("#admin-code-role"),
+  adminCodeLimit: document.querySelector("#admin-code-limit"),
+  adminCodeList: document.querySelector("#admin-code-list"),
+  adminUserList: document.querySelector("#admin-user-list"),
+  adminGroupForm: document.querySelector("#admin-group-form"),
+  adminGroupTitle: document.querySelector("#admin-group-title"),
+  adminGroupDescription: document.querySelector("#admin-group-description"),
+  adminScheduleForm: document.querySelector("#admin-schedule-form"),
+  adminEventTitle: document.querySelector("#admin-event-title"),
+  adminEventTrainer: document.querySelector("#admin-event-trainer"),
+  adminEventPlace: document.querySelector("#admin-event-place"),
+  adminEventDate: document.querySelector("#admin-event-date"),
   authTabs: document.querySelectorAll("[data-auth-mode]"),
   signupOnlyFields: document.querySelectorAll(".signup-only"),
   loginOnlyFields: document.querySelectorAll(".login-only"),
@@ -147,8 +133,31 @@ function toPublicUser(user) {
   return publicUser;
 }
 
+function getRoleName(role) {
+  return {
+    client: "Клиент",
+    trainer: "Тренер",
+    admin: "Администратор",
+  }[role] || "Клиент";
+}
+
+function getRoleLabel(role) {
+  return {
+    client: "клиент клуба",
+    trainer: "тренер клуба",
+    admin: "администратор",
+  }[role] || "клиент клуба";
+}
+
+function getInviteByCode(code) {
+  return MyFitClubStore.list("invitationCodes").find(
+    (candidate) => candidate.code === code && candidate.isActive,
+  );
+}
+
 function createUser({ name, email, password, code }) {
-  const invite = inviteCodes[code];
+  const invite = getInviteByCode(code) || inviteCodes[code];
+  const role = invite.role;
 
   return {
     id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -156,9 +165,9 @@ function createUser({ name, email, password, code }) {
     email,
     password,
     code,
-    label: invite.label,
-    role: invite.role,
-    roleName: invite.roleName,
+    label: getRoleLabel(role),
+    role,
+    roleName: invite.roleName || getRoleName(role),
     createdAt: new Date().toISOString(),
   };
 }
@@ -409,7 +418,7 @@ function renderGroups() {
 }
 
 function renderSchedule() {
-  elements.scheduleList.innerHTML = schedule
+  elements.scheduleList.innerHTML = MyFitClubStore.list("scheduleEvents")
     .map((event) => {
       const isBooked = state.bookedScheduleIds.has(event.id);
 
@@ -418,6 +427,7 @@ function renderSchedule() {
           <div>
             <h3>${event.title}</h3>
             <span>${event.trainer} · ${event.place}</span>
+            <p>${event.description || ""}</p>
           </div>
           <div class="schedule-actions">
             <div class="schedule-meta">${event.date}</div>
@@ -462,6 +472,43 @@ function renderDatabaseStats() {
   elements.dbCodesCount.textContent = MyFitClubStore.count("invitationCodes");
 }
 
+function renderAdminPanel() {
+  const codes = MyFitClubStore.list("invitationCodes");
+  const users = MyFitClubStore.list("users");
+  const scheduleEvents = MyFitClubStore.list("scheduleEvents");
+
+  elements.adminCodesCount.textContent = codes.filter((code) => code.isActive).length;
+  elements.adminUsersCount.textContent = users.length;
+  elements.adminScheduleCount.textContent = scheduleEvents.length;
+  elements.adminCodeList.innerHTML = codes
+    .map(
+      (code) => `<span>${code.code} -> ${getRoleName(code.role)} (${code.usedCount}/${code.usageLimit})</span>`,
+    )
+    .join("");
+  elements.adminUserList.innerHTML = users.length
+    ? users
+        .map(
+          (user) => `
+            <article>
+              <strong>${user.name}</strong>
+              <span>${user.email} · ${user.roleName}</span>
+            </article>
+          `,
+        )
+        .join("")
+    : "<p>Пока есть только демо-пользователь после инициализации.</p>";
+}
+
+function refreshAppData() {
+  renderDirectDialogs();
+  renderGroups();
+  renderSchedule();
+  renderNotifications();
+  updateBookingCount();
+  renderDatabaseStats();
+  renderAdminPanel();
+}
+
 function activateView(viewName) {
   elements.tabs.forEach((tab) => {
     tab.classList.toggle("active", tab.dataset.view === viewName);
@@ -504,12 +551,9 @@ elements.authForm.addEventListener("submit", (event) => {
   }
 
   const code = normalizeCode(elements.inviteCode.value);
-  const invite = inviteCodes[code];
-  const storedInvite = MyFitClubStore.list("invitationCodes").find(
-    (candidate) => candidate.code === code && candidate.isActive,
-  );
+  const storedInvite = getInviteByCode(code);
 
-  if (!invite || !storedInvite) {
+  if (!storedInvite) {
     elements.authError.textContent =
       "Неверный пригласительный код. Попробуйте CLIENT2026, TRAINER2026 или ADMIN2026.";
     return;
@@ -635,17 +679,108 @@ elements.scheduleList.addEventListener("click", (event) => {
   renderDatabaseStats();
 });
 
+elements.adminCodeForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  if (state.currentUser?.role !== "admin") {
+    return;
+  }
+
+  const code = normalizeCode(elements.adminCodeInput.value);
+  const role = elements.adminCodeRole.value;
+  const usageLimit = Number(elements.adminCodeLimit.value) || 1;
+
+  if (!code || getInviteByCode(code)) {
+    return;
+  }
+
+  MyFitClubStore.add("invitationCodes", {
+    code,
+    role,
+    roleName: getRoleName(role),
+    isActive: true,
+    usageLimit,
+    usedCount: 0,
+  });
+  elements.adminCodeInput.value = "";
+  renderAdminPanel();
+  renderDatabaseStats();
+});
+
+elements.adminGroupForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  if (state.currentUser?.role !== "admin") {
+    return;
+  }
+
+  const title = elements.adminGroupTitle.value.trim();
+  const description = elements.adminGroupDescription.value.trim();
+
+  if (!title || !description) {
+    return;
+  }
+
+  const chat = MyFitClubStore.add("chats", {
+    title,
+    type: "group",
+    description,
+    participantIds: ["all"],
+    createdAt: new Date().toISOString(),
+  });
+  MyFitClubStore.add("messages", {
+    chatId: chat.id,
+    author: state.currentUser.name,
+    text: `Группа "${title}" создана администратором.`,
+    role: state.currentUser.role,
+    userId: state.currentUser.id,
+    createdAt: new Date().toISOString(),
+  });
+  elements.adminGroupTitle.value = "";
+  elements.adminGroupDescription.value = "";
+  renderGroups();
+  renderAdminPanel();
+  renderDatabaseStats();
+});
+
+elements.adminScheduleForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  if (state.currentUser?.role !== "admin") {
+    return;
+  }
+
+  const title = elements.adminEventTitle.value.trim();
+  const trainer = elements.adminEventTrainer.value.trim();
+  const place = elements.adminEventPlace.value.trim();
+  const date = elements.adminEventDate.value.trim();
+
+  if (!title || !trainer || !place || !date) {
+    return;
+  }
+
+  MyFitClubStore.add("scheduleEvents", {
+    title,
+    trainer,
+    place,
+    date,
+    description: "Занятие добавлено через админ-панель.",
+    capacity: 12,
+  });
+  elements.adminEventTitle.value = "";
+  elements.adminEventTrainer.value = "";
+  elements.adminEventPlace.value = "";
+  elements.adminEventDate.value = "";
+  renderSchedule();
+  renderAdminPanel();
+});
+
 elements.resetDemo.addEventListener("click", resetDemo);
 
 seedDemoUsers();
 state.bookedScheduleIds = new Set(loadBookings());
 setAuthMode("signup");
-renderDirectDialogs();
-renderGroups();
-renderSchedule();
-renderNotifications();
-updateBookingCount();
-renderDatabaseStats();
+refreshAppData();
 elements.resetDemo.classList.add("hidden");
 
 const savedUser = loadSession();

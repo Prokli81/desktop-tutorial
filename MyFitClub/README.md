@@ -15,7 +15,7 @@ and admins can communicate, view schedules and stay inside one club space.
 - class schedule with local demo booking;
 - notification center;
 - profile screen;
-- admin panel shown only for the admin role;
+- admin panel shown only for the admin role, with local forms for invite codes, groups and schedule events;
 - Russian product blueprint in `docs/product-blueprint.md`;
 - step-by-step development order in `docs/step-by-step.md`.
 
@@ -52,7 +52,8 @@ See:
   real mobile app;
 - `docs/auth-flow.md` for the registration, login and invite-code flow;
 - `docs/database-plan.md` for the local database collections and Firebase migration path;
-- `docs/chat-flow.md` for the unified chat/message model.
+- `docs/chat-flow.md` for the unified chat/message model;
+- `docs/admin-panel.md` for admin actions and production rules.
 
 ## Next product steps
 
