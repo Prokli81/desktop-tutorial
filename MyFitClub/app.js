@@ -25,62 +25,9 @@ const state = {
   authMode: "signup",
   currentUser: null,
   bookedScheduleIds: new Set(),
-  clubMessages: [],
+  activeChatId: "club-main",
+  previousView: "club-chat",
 };
-
-const directDialogs = [
-  {
-    name: "Мария Соколова",
-    role: "Тренер по йоге",
-    lastMessage: "Могу подобрать мягкую программу на эту неделю.",
-    time: "12:40",
-  },
-  {
-    name: "Алексей Орлов",
-    role: "Силовой тренер",
-    lastMessage: "После тренировки пришлю технику приседа.",
-    time: "11:15",
-  },
-  {
-    name: "Елена",
-    role: "Администратор",
-    lastMessage: "Ваш абонемент активен до конца месяца.",
-    time: "09:30",
-  },
-];
-
-const groups = [
-  {
-    title: "Питание",
-    description: "Рационы, привычки, вода и вопросы тренерам.",
-    members: "86 участников",
-    accent: "badge",
-  },
-  {
-    title: "Похудение",
-    description: "Поддержка, замеры, мотивация и безопасный прогресс.",
-    members: "54 участника",
-    accent: "badge-blue",
-  },
-  {
-    title: "Набор массы",
-    description: "Силовые планы, восстановление и разбор техники.",
-    members: "38 участников",
-    accent: "badge",
-  },
-  {
-    title: "Йога",
-    description: "Растяжка, дыхание, спокойные практики и расписание.",
-    members: "42 участника",
-    accent: "badge-blue",
-  },
-  {
-    title: "Новички",
-    description: "Первые шаги в клубе, правила и помощь админа.",
-    members: "23 участника",
-    accent: "badge",
-  },
-];
 
 const schedule = [
   {
@@ -134,12 +81,20 @@ const elements = {
   clubChatList: document.querySelector("#club-chat-list"),
   clubMessageForm: document.querySelector("#club-message-form"),
   clubMessageInput: document.querySelector("#club-message-input"),
+  chatDetailType: document.querySelector("#chat-detail-type"),
+  chatDetailTitle: document.querySelector("#chat-detail-title"),
+  chatDetailDescription: document.querySelector("#chat-detail-description"),
+  chatDetailList: document.querySelector("#chat-detail-list"),
+  chatDetailForm: document.querySelector("#chat-detail-form"),
+  chatDetailInput: document.querySelector("#chat-detail-input"),
+  chatBackButton: document.querySelector("#chat-back-button"),
   directList: document.querySelector("#direct-list"),
   groupList: document.querySelector("#group-list"),
   scheduleList: document.querySelector("#schedule-list"),
   bookingCount: document.querySelector("#booking-count"),
   notificationList: document.querySelector("#notification-list"),
   dbUsersCount: document.querySelector("#db-users-count"),
+  dbChatsCount: document.querySelector("#db-chats-count"),
   dbMessagesCount: document.querySelector("#db-messages-count"),
   dbBookingsCount: document.querySelector("#db-bookings-count"),
   dbNotificationsCount: document.querySelector("#db-notifications-count"),
@@ -283,7 +238,46 @@ function setAuthMode(mode) {
   state.authMode = mode;
   const isSignup = mode === "signup";
 
-  elements.authTabs.forEach((tab) => {
+  elements.chatDetailForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  if (!state.currentUser) {
+    return;
+  }
+
+  const text = elements.chatDetailInput.value.trim();
+
+  if (!text) {
+    return;
+  }
+
+  createMessage(state.activeChatId, text);
+  elements.chatDetailInput.value = "";
+  renderMessageList(elements.chatDetailList, state.activeChatId);
+  renderDirectDialogs();
+  renderGroups();
+  renderClubMessages();
+});
+
+elements.directList.addEventListener("click", (event) => {
+  const row = event.target.closest("[data-chat-id]");
+
+  if (row) {
+    openChat(row.dataset.chatId, row.dataset.sourceView);
+  }
+});
+
+elements.groupList.addEventListener("click", (event) => {
+  const row = event.target.closest("[data-chat-id]");
+
+  if (row) {
+    openChat(row.dataset.chatId, row.dataset.sourceView);
+  }
+});
+
+elements.chatBackButton.addEventListener("click", () => activateView(state.previousView));
+
+elements.authTabs.forEach((tab) => {
     tab.classList.toggle("active", tab.dataset.authMode === mode);
   });
   elements.signupOnlyFields.forEach((field) => field.classList.toggle("hidden", !isSignup));
@@ -303,56 +297,114 @@ function setAuthMode(mode) {
   elements.authSuccess.textContent = "";
 }
 
-function renderClubMessages() {
-  elements.clubChatList.innerHTML = "";
+function getChatsByType(type) {
+  return MyFitClubStore.list("chats").filter((chat) => chat.type === type);
+}
 
-  state.clubMessages.forEach((message) => {
+function getChat(chatId) {
+  return MyFitClubStore.list("chats").find((chat) => chat.id === chatId);
+}
+
+function getMessagesByChat(chatId) {
+  return MyFitClubStore.list("messages").filter((message) => message.chatId === chatId);
+}
+
+function getLastMessage(chatId) {
+  return getMessagesByChat(chatId).at(-1);
+}
+
+function createMessage(chatId, text) {
+  const message = MyFitClubStore.add("messages", {
+    chatId,
+    author: state.currentUser.name,
+    text,
+    role: state.currentUser.role,
+    userId: state.currentUser.id,
+    createdAt: new Date().toISOString(),
+  });
+  renderDatabaseStats();
+  return message;
+}
+
+function renderMessageList(container, chatId) {
+  container.innerHTML = "";
+
+  getMessagesByChat(chatId).forEach((message) => {
     const article = document.createElement("article");
     const author = document.createElement("strong");
     const body = document.createElement("p");
 
-    article.className = `message ${message.mine ? "mine" : ""}`;
+    article.className = `message ${message.userId === state.currentUser?.id ? "mine" : ""}`;
     author.textContent = message.author;
     body.textContent = message.text;
 
     article.append(author, body);
-    elements.clubChatList.append(article);
+    container.append(article);
   });
 }
 
+function renderClubMessages() {
+  renderMessageList(elements.clubChatList, "club-main");
+}
+
+function openChat(chatId, previousView = "groups") {
+  const chat = getChat(chatId);
+
+  if (!chat) {
+    return;
+  }
+
+  state.activeChatId = chatId;
+  state.previousView = previousView;
+  elements.chatDetailType.textContent = chat.type === "direct" ? "личный диалог" : "групповой чат";
+  elements.chatDetailTitle.textContent = chat.title;
+  elements.chatDetailDescription.textContent = chat.description;
+  renderMessageList(elements.chatDetailList, chatId);
+  activateView("chat-detail");
+}
+
 function renderDirectDialogs() {
-  elements.directList.innerHTML = directDialogs
-    .map(
-      (dialog) => `
-        <article class="dialog-row">
+  elements.directList.innerHTML = getChatsByType("direct")
+    .map((chat) => {
+      const lastMessage = getLastMessage(chat.id);
+      const time = lastMessage
+        ? new Date(lastMessage.createdAt).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })
+        : "--:--";
+
+      return `
+        <article class="dialog-row chat-open-row" data-chat-id="${chat.id}" data-source-view="direct">
           <div>
-            <h3>${dialog.name}</h3>
-            <span>${dialog.role}</span>
-            <p>${dialog.lastMessage}</p>
+            <h3>${chat.title}</h3>
+            <span>${chat.description}</span>
+            <p>${lastMessage?.text || "Сообщений пока нет."}</p>
           </div>
-          <div class="dialog-meta">${dialog.time}</div>
+          <div class="dialog-meta">${time}</div>
         </article>
-      `,
-    )
+      `;
+    })
     .join("");
 }
 
 function renderGroups() {
-  elements.groupList.innerHTML = groups
-    .map(
-      (group) => `
-        <article class="group-card">
+  elements.groupList.innerHTML = getChatsByType("group")
+    .map((chat, index) => {
+      const lastMessage = getLastMessage(chat.id);
+      const accent = index % 2 === 0 ? "badge" : "badge-blue";
+      const messageCount = getMessagesByChat(chat.id).length;
+
+      return `
+        <article class="group-card chat-open-row" data-chat-id="${chat.id}" data-source-view="groups">
           <div>
             <div class="panel-heading">
-              <h3>${group.title}</h3>
-              <span class="badge ${group.accent}">чат</span>
+              <h3>${chat.title}</h3>
+              <span class="badge ${accent}">${messageCount} сообщ.</span>
             </div>
-            <p>${group.description}</p>
+            <p>${chat.description}</p>
           </div>
-          <span>${group.members}</span>
+          <span>${lastMessage?.text || "Открыть чат"}</span>
         </article>
-      `,
-    )
+      `;
+    })
     .join("");
 }
 
@@ -403,7 +455,8 @@ function updateBookingCount() {
 
 function renderDatabaseStats() {
   elements.dbUsersCount.textContent = MyFitClubStore.count("users");
-  elements.dbMessagesCount.textContent = MyFitClubStore.count("clubMessages");
+  elements.dbChatsCount.textContent = MyFitClubStore.count("chats");
+  elements.dbMessagesCount.textContent = MyFitClubStore.count("messages");
   elements.dbBookingsCount.textContent = MyFitClubStore.count("bookings");
   elements.dbNotificationsCount.textContent = MyFitClubStore.count("notifications");
   elements.dbCodesCount.textContent = MyFitClubStore.count("invitationCodes");
@@ -505,18 +558,49 @@ elements.clubMessageForm.addEventListener("submit", (event) => {
     return;
   }
 
-  const message = MyFitClubStore.add("clubMessages", {
-    author: state.currentUser.name,
-    text,
-    role: state.currentUser.role,
-    userId: state.currentUser.id,
-    createdAt: new Date().toISOString(),
-  });
-  state.clubMessages.push({ ...message, mine: true });
+  createMessage("club-main", text);
   elements.clubMessageInput.value = "";
   renderClubMessages();
-  renderDatabaseStats();
 });
+
+elements.chatDetailForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  if (!state.currentUser) {
+    return;
+  }
+
+  const text = elements.chatDetailInput.value.trim();
+
+  if (!text) {
+    return;
+  }
+
+  createMessage(state.activeChatId, text);
+  elements.chatDetailInput.value = "";
+  renderMessageList(elements.chatDetailList, state.activeChatId);
+  renderDirectDialogs();
+  renderGroups();
+  renderClubMessages();
+});
+
+elements.directList.addEventListener("click", (event) => {
+  const row = event.target.closest("[data-chat-id]");
+
+  if (row) {
+    openChat(row.dataset.chatId, row.dataset.sourceView);
+  }
+});
+
+elements.groupList.addEventListener("click", (event) => {
+  const row = event.target.closest("[data-chat-id]");
+
+  if (row) {
+    openChat(row.dataset.chatId, row.dataset.sourceView);
+  }
+});
+
+elements.chatBackButton.addEventListener("click", () => activateView(state.previousView));
 
 elements.authTabs.forEach((tab) => {
   tab.addEventListener("click", () => setAuthMode(tab.dataset.authMode));
@@ -554,7 +638,6 @@ elements.scheduleList.addEventListener("click", (event) => {
 elements.resetDemo.addEventListener("click", resetDemo);
 
 seedDemoUsers();
-state.clubMessages = MyFitClubStore.list("clubMessages");
 state.bookedScheduleIds = new Set(loadBookings());
 setAuthMode("signup");
 renderDirectDialogs();

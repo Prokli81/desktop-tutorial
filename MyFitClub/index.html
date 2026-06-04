@@ -160,6 +160,7 @@
             <button class="tab" type="button" data-view="groups">Группы</button>
             <button class="tab" type="button" data-view="schedule">Расписание</button>
             <button class="tab" type="button" data-view="notifications">Уведомления</button>
+            <button class="tab hidden" type="button" data-view="chat-detail">Диалог</button>
             <button class="tab" type="button" data-view="profile">Профиль</button>
           </nav>
 
@@ -293,6 +294,22 @@
             <div class="group-grid" id="group-list"></div>
           </section>
 
+          <section class="view" id="chat-detail" data-view-panel>
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow" id="chat-detail-type">диалог</p>
+                <h2 id="chat-detail-title">Чат</h2>
+              </div>
+              <button class="ghost-button" id="chat-back-button" type="button">Назад</button>
+            </div>
+            <p class="helper-text" id="chat-detail-description">Сообщения выбранного диалога.</p>
+            <div class="chat-card" id="chat-detail-list"></div>
+            <form class="message-form" id="chat-detail-form">
+              <input id="chat-detail-input" type="text" placeholder="Написать сообщение..." />
+              <button class="primary-button" type="submit">Отправить</button>
+            </form>
+          </section>
+
           <section class="view" id="schedule" data-view-panel>
             <div class="section-heading">
               <div>
@@ -357,6 +374,7 @@
               </p>
               <div class="database-grid">
                 <article><strong id="db-users-count">0</strong><span>Users</span></article>
+                <article><strong id="db-chats-count">0</strong><span>Chats</span></article>
                 <article><strong id="db-messages-count">0</strong><span>Messages</span></article>
                 <article><strong id="db-bookings-count">0</strong><span>Bookings</span></article>
                 <article><strong id="db-notifications-count">0</strong><span>Notifications</span></article>

@@ -11,7 +11,9 @@ backend API.
 
 - `users`;
 - `invitationCodes`;
-- `clubMessages`;
+- `chats`;
+- `messages`;
+- `clubMessages` - оставлено только для совместимости старого прототипа;
 - `bookings`;
 - `notifications`.
 
@@ -49,13 +51,27 @@ backend API.
 - `usageLimit`;
 - `usedCount`.
 
-### clubMessages
+### chats
 
-Назначение: общий чат клуба.
+Назначение: список всех диалогов.
 
 Поля:
 
 - `id`;
+- `title`;
+- `type`: `club`, `group`, `direct`;
+- `description`;
+- `participantIds`;
+- `createdAt`.
+
+### messages
+
+Назначение: сообщения всех типов чатов.
+
+Поля:
+
+- `id`;
+- `chatId`;
 - `author`;
 - `text`;
 - `role`;
