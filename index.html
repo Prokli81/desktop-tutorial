@@ -64,6 +64,7 @@
             <button class="tab" type="button" data-view="direct">Личные</button>
             <button class="tab" type="button" data-view="groups">Группы</button>
             <button class="tab" type="button" data-view="schedule">Расписание</button>
+            <button class="tab" type="button" data-view="notifications">Уведомления</button>
             <button class="tab" type="button" data-view="profile">Профиль</button>
           </nav>
 
@@ -95,6 +96,34 @@
               <article class="metric-card">
                 <span>Группы</span>
                 <strong>5 тем</strong>
+              </article>
+              <article class="metric-card">
+                <span>Мои записи</span>
+                <strong id="booking-count">0</strong>
+              </article>
+            </div>
+
+            <div class="progress-layout">
+              <article class="panel">
+                <div class="panel-heading">
+                  <h3>План недели</h3>
+                  <span class="badge">72%</span>
+                </div>
+                <p>Цель: 3 тренировки, 2 растяжки и ежедневная вода.</p>
+                <div class="progress-track" aria-label="Прогресс недельного плана">
+                  <span class="progress-fill"></span>
+                </div>
+              </article>
+              <article class="panel">
+                <div class="panel-heading">
+                  <h3>Быстрые действия</h3>
+                  <span class="badge badge-blue">MVP</span>
+                </div>
+                <div class="quick-actions">
+                  <button class="secondary-button" type="button" data-quick-view="schedule">Записаться</button>
+                  <button class="secondary-button" type="button" data-quick-view="club-chat">Написать в чат</button>
+                  <button class="secondary-button" type="button" data-quick-view="notifications">Уведомления</button>
+                </div>
               </article>
             </div>
 
@@ -164,7 +193,18 @@
                 <h2>Ближайшие занятия</h2>
               </div>
             </div>
+            <p class="helper-text">Нажмите "Записаться", чтобы увидеть, как будет работать запись на занятие.</p>
             <div class="schedule-list" id="schedule-list"></div>
+          </section>
+
+          <section class="view" id="notifications" data-view-panel>
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">push-уведомления</p>
+                <h2>Что важно не пропустить</h2>
+              </div>
+            </div>
+            <div class="notification-list" id="notification-list"></div>
           </section>
 
           <section class="view" id="profile" data-view-panel>
@@ -188,6 +228,17 @@
               </p>
             </div>
 
+            <div class="panel">
+              <div class="panel-heading">
+                <h3>Следующий этап</h3>
+                <span class="badge badge-blue">Firebase</span>
+              </div>
+              <p>
+                После прототипа сюда подключаются настоящая регистрация,
+                база данных, push-уведомления и мобильная упаковка для iOS/Android.
+              </p>
+            </div>
+
             <div class="admin-panel hidden" id="admin-panel">
               <div class="section-heading compact">
                 <div>
@@ -208,6 +259,11 @@
                   <strong>9</strong>
                   занятий в расписании
                 </article>
+              </div>
+              <div class="code-list" id="admin-code-list">
+                <span>CLIENT2026 -> клиент</span>
+                <span>TRAINER2026 -> тренер</span>
+                <span>ADMIN2026 -> администратор</span>
               </div>
             </div>
           </section>

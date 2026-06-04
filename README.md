@@ -11,9 +11,11 @@ and admins can communicate, view schedules and stay inside one club space.
 - main club chat with local demo messages;
 - private-message overview;
 - topic groups;
-- class schedule;
+- class schedule with local demo booking;
+- notification center;
 - profile screen;
-- admin panel shown only for the admin role.
+- admin panel shown only for the admin role;
+- Russian product blueprint in `docs/product-blueprint.md`.
 
 ## Demo invitation codes
 
@@ -31,6 +33,14 @@ python3 -m http.server 4173
 ```
 
 Then open `http://localhost:4173`.
+
+The prototype stores demo session and class bookings in browser `localStorage`, so
+it can show role switching and booking state without a backend.
+
+## Product documentation
+
+See `docs/product-blueprint.md` for the Russian-language product plan, roles,
+MVP scope, screens, data model and recommended implementation stack.
 
 ## Next product steps
 

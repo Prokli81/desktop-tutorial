@@ -21,6 +21,7 @@ const inviteCodes = {
 
 const state = {
   currentUser: null,
+  bookedScheduleIds: new Set(),
   clubMessages: [
     {
       author: "Елена, админ",
@@ -96,28 +97,50 @@ const groups = [
 
 const schedule = [
   {
+    id: "functional-morning",
     title: "Утренняя функциональная",
     trainer: "Алексей Орлов",
     place: "Зал 1",
     date: "Пт, 08:00",
   },
   {
+    id: "yoga-mobility",
     title: "Йога и мобильность",
     trainer: "Мария Соколова",
     place: "Зал 2",
     date: "Пт, 18:00",
   },
   {
+    id: "strength-technique",
     title: "Силовая техника",
     trainer: "Алексей Орлов",
     place: "Зал 1",
     date: "Сб, 12:00",
   },
   {
+    id: "club-challenge",
     title: "Клубный челлендж",
     trainer: "Команда тренеров",
     place: "Главный зал",
     date: "Вс, 11:00",
+  },
+];
+
+const notifications = [
+  {
+    time: "Сегодня, 17:00",
+    title: "Напоминание о тренировке",
+    text: "Йога и мобильность начнется через час. Возьмите воду и коврик.",
+  },
+  {
+    time: "Завтра, 09:00",
+    title: "Новое объявление клуба",
+    text: "Открыта запись на субботнюю функциональную тренировку.",
+  },
+  {
+    time: "Пн, 08:30",
+    title: "Челлендж недели",
+    text: "Проверьте группу "Питание" и отметьте первый день дневника воды.",
   },
 ];
 
@@ -141,6 +164,8 @@ const elements = {
   directList: document.querySelector("#direct-list"),
   groupList: document.querySelector("#group-list"),
   scheduleList: document.querySelector("#schedule-list"),
+  bookingCount: document.querySelector("#booking-count"),
+  notificationList: document.querySelector("#notification-list"),
   tabs: document.querySelectorAll(".tab"),
   views: document.querySelectorAll("[data-view-panel]"),
 };
@@ -156,6 +181,28 @@ function getInitials(name) {
 
 function saveSession(user) {
   localStorage.setItem("myfitclub:user", JSON.stringify(user));
+}
+
+function loadBookings() {
+  const raw = localStorage.getItem("myfitclub:bookings");
+
+  if (!raw) {
+    return [];
+  }
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    localStorage.removeItem("myfitclub:bookings");
+    return [];
+  }
+}
+
+function saveBookings() {
+  localStorage.setItem(
+    "myfitclub:bookings",
+    JSON.stringify([...state.bookedScheduleIds]),
+  );
 }
 
 function loadSession() {
@@ -187,6 +234,9 @@ function enterApp(user) {
   elements.adminPanel.classList.toggle("hidden", user.role !== "admin");
 
   renderClubMessages();
+  renderSchedule();
+  renderNotifications();
+  updateBookingCount();
 }
 
 function resetDemo() {
@@ -203,11 +253,14 @@ function renderClubMessages() {
 
   state.clubMessages.forEach((message) => {
     const article = document.createElement("article");
+    const author = document.createElement("strong");
+    const body = document.createElement("p");
+
     article.className = `message ${message.mine ? "mine" : ""}`;
-    article.innerHTML = `
-      <strong>${message.author}</strong>
-      <p>${message.text}</p>
-    `;
+    author.textContent = message.author;
+    body.textContent = message.text;
+
+    article.append(author, body);
     elements.clubChatList.append(article);
   });
 }
@@ -250,18 +303,47 @@ function renderGroups() {
 
 function renderSchedule() {
   elements.scheduleList.innerHTML = schedule
-    .map(
-      (event) => `
+    .map((event) => {
+      const isBooked = state.bookedScheduleIds.has(event.id);
+
+      return `
         <article class="schedule-row">
           <div>
             <h3>${event.title}</h3>
             <span>${event.trainer} · ${event.place}</span>
           </div>
-          <div class="schedule-meta">${event.date}</div>
+          <div class="schedule-actions">
+            <div class="schedule-meta">${event.date}</div>
+            <button
+              class="secondary-button ${isBooked ? "active" : ""}"
+              type="button"
+              data-schedule-id="${event.id}"
+            >
+              ${isBooked ? "Вы записаны" : "Записаться"}
+            </button>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function renderNotifications() {
+  elements.notificationList.innerHTML = notifications
+    .map(
+      (notification) => `
+        <article class="notification-card">
+          <time>${notification.time}</time>
+          <strong>${notification.title}</strong>
+          <p>${notification.text}</p>
         </article>
       `,
     )
     .join("");
+}
+
+function updateBookingCount() {
+  elements.bookingCount.textContent = state.bookedScheduleIds.size;
 }
 
 function activateView(viewName) {
@@ -323,11 +405,38 @@ elements.tabs.forEach((tab) => {
   tab.addEventListener("click", () => activateView(tab.dataset.view));
 });
 
+document.querySelectorAll("[data-quick-view]").forEach((button) => {
+  button.addEventListener("click", () => activateView(button.dataset.quickView));
+});
+
+elements.scheduleList.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-schedule-id]");
+
+  if (!button) {
+    return;
+  }
+
+  const scheduleId = button.dataset.scheduleId;
+
+  if (state.bookedScheduleIds.has(scheduleId)) {
+    state.bookedScheduleIds.delete(scheduleId);
+  } else {
+    state.bookedScheduleIds.add(scheduleId);
+  }
+
+  saveBookings();
+  renderSchedule();
+  updateBookingCount();
+});
+
 elements.resetDemo.addEventListener("click", resetDemo);
 
+state.bookedScheduleIds = new Set(loadBookings());
 renderDirectDialogs();
 renderGroups();
 renderSchedule();
+renderNotifications();
+updateBookingCount();
 elements.resetDemo.classList.add("hidden");
 
 const savedUser = loadSession();
