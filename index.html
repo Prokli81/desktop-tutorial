@@ -22,7 +22,7 @@
             <h1>MyFitClub</h1>
           </div>
         </div>
-        <button class="ghost-button" id="reset-demo" type="button">Сменить роль</button>
+        <button class="ghost-button" id="reset-demo" type="button">Выйти</button>
       </header>
 
       <main>
@@ -57,12 +57,46 @@
             </div>
           </div>
 
-          <form class="invite-card" id="invite-form">
-            <label for="member-name">Ваше имя</label>
-            <input id="member-name" name="member-name" type="text" value="Анна" autocomplete="name" />
+          <form class="invite-card" id="auth-form">
+            <div class="auth-toggle" aria-label="Выберите действие">
+              <button class="auth-tab active" type="button" data-auth-mode="signup">Регистрация</button>
+              <button class="auth-tab" type="button" data-auth-mode="login">Вход</button>
+            </div>
 
-            <label for="invite-code">Пригласительный код</label>
+            <label class="signup-only" for="member-name">Ваше имя</label>
             <input
+              class="signup-only"
+              id="member-name"
+              name="member-name"
+              type="text"
+              value="Анна"
+              autocomplete="name"
+            />
+
+            <label for="member-email">Email</label>
+            <input
+              id="member-email"
+              name="member-email"
+              type="email"
+              value="new-client@myfitclub.demo"
+              autocomplete="email"
+              required
+            />
+
+            <label for="member-password">Пароль</label>
+            <input
+              id="member-password"
+              name="member-password"
+              type="password"
+              value="fitclub"
+              autocomplete="current-password"
+              minlength="4"
+              required
+            />
+
+            <label class="signup-only" for="invite-code">Пригласительный код</label>
+            <input
+              class="signup-only"
               id="invite-code"
               name="invite-code"
               type="text"
@@ -70,15 +104,19 @@
               autocomplete="off"
               aria-describedby="invite-help"
             />
-            <p class="hint" id="invite-help">
+            <p class="hint signup-only" id="invite-help">
               Демо-коды: CLIENT2026, TRAINER2026, ADMIN2026
             </p>
-            <button class="primary-button" type="submit">Войти в клуб</button>
-            <p class="form-error" id="invite-error" role="alert"></p>
+            <p class="hint login-only hidden" id="login-help">
+              Демо-вход: anna@myfitclub.demo / fitclub
+            </p>
+            <button class="primary-button" id="auth-submit" type="submit">Создать аккаунт</button>
+            <p class="form-error" id="auth-error" role="alert"></p>
+            <p class="form-success" id="auth-success" role="status"></p>
             <div class="access-note">
-              <strong>Порядок проверки:</strong>
-              сначала зайдите как клиент, потом смените роль и попробуйте
-              администратора.
+              <strong>Шаг 2:</strong>
+              аккаунт создаётся по коду, сохраняется в браузере и затем
+              открывается обычным входом по email и паролю.
             </div>
           </form>
         </section>

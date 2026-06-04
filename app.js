@@ -1,3 +1,7 @@
+const USERS_STORAGE_KEY = "myfitclub:users";
+const SESSION_STORAGE_KEY = "myfitclub:user";
+const BOOKINGS_STORAGE_KEY = "myfitclub:bookings";
+
 const inviteCodes = {
   CLIENT2026: {
     label: "клиент клуба",
@@ -20,6 +24,7 @@ const inviteCodes = {
 };
 
 const state = {
+  authMode: "signup",
   currentUser: null,
   bookedScheduleIds: new Set(),
   clubMessages: [
@@ -147,10 +152,14 @@ const notifications = [
 const elements = {
   inviteScreen: document.querySelector("#invite-screen"),
   appScreen: document.querySelector("#app-screen"),
-  inviteForm: document.querySelector("#invite-form"),
-  inviteError: document.querySelector("#invite-error"),
+  authForm: document.querySelector("#auth-form"),
+  authError: document.querySelector("#auth-error"),
+  authSuccess: document.querySelector("#auth-success"),
+  authSubmit: document.querySelector("#auth-submit"),
   inviteCode: document.querySelector("#invite-code"),
   memberName: document.querySelector("#member-name"),
+  memberEmail: document.querySelector("#member-email"),
+  memberPassword: document.querySelector("#member-password"),
   resetDemo: document.querySelector("#reset-demo"),
   roleLabel: document.querySelector("#role-label"),
   welcomeTitle: document.querySelector("#welcome-title"),
@@ -166,6 +175,9 @@ const elements = {
   scheduleList: document.querySelector("#schedule-list"),
   bookingCount: document.querySelector("#booking-count"),
   notificationList: document.querySelector("#notification-list"),
+  authTabs: document.querySelectorAll("[data-auth-mode]"),
+  signupOnlyFields: document.querySelectorAll(".signup-only"),
+  loginOnlyFields: document.querySelectorAll(".login-only"),
   tabs: document.querySelectorAll(".tab"),
   views: document.querySelectorAll("[data-view-panel]"),
 };
@@ -174,50 +186,95 @@ function normalizeCode(code) {
   return code.trim().toUpperCase();
 }
 
+function normalizeEmail(email) {
+  return email.trim().toLowerCase();
+}
+
 function getInitials(name) {
   const trimmed = name.trim();
   return trimmed ? trimmed[0].toUpperCase() : "M";
 }
 
-function saveSession(user) {
-  localStorage.setItem("myfitclub:user", JSON.stringify(user));
-}
-
-function loadBookings() {
-  const raw = localStorage.getItem("myfitclub:bookings");
+function loadJson(key, fallback) {
+  const raw = localStorage.getItem(key);
 
   if (!raw) {
-    return [];
+    return fallback;
   }
 
   try {
     return JSON.parse(raw);
   } catch {
-    localStorage.removeItem("myfitclub:bookings");
-    return [];
+    localStorage.removeItem(key);
+    return fallback;
   }
+}
+
+function saveUsers(users) {
+  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+}
+
+function loadUsers() {
+  return loadJson(USERS_STORAGE_KEY, []);
+}
+
+function toPublicUser(user) {
+  const { password, ...publicUser } = user;
+  return publicUser;
+}
+
+function createUser({ name, email, password, code }) {
+  const invite = inviteCodes[code];
+
+  return {
+    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    name,
+    email,
+    password,
+    code,
+    label: invite.label,
+    role: invite.role,
+    roleName: invite.roleName,
+    createdAt: new Date().toISOString(),
+  };
+}
+
+function seedDemoUsers() {
+  const users = loadUsers();
+  const demoEmail = "anna@myfitclub.demo";
+
+  if (users.some((user) => user.email === demoEmail)) {
+    return;
+  }
+
+  users.push(
+    createUser({
+      name: "Анна",
+      email: demoEmail,
+      password: "fitclub",
+      code: "CLIENT2026",
+    }),
+  );
+  saveUsers(users);
+}
+
+function saveSession(user) {
+  localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
+}
+
+function loadBookings() {
+  return loadJson(BOOKINGS_STORAGE_KEY, []);
 }
 
 function saveBookings() {
   localStorage.setItem(
-    "myfitclub:bookings",
+    BOOKINGS_STORAGE_KEY,
     JSON.stringify([...state.bookedScheduleIds]),
   );
 }
 
 function loadSession() {
-  const raw = localStorage.getItem("myfitclub:user");
-
-  if (!raw) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(raw);
-  } catch {
-    localStorage.removeItem("myfitclub:user");
-    return null;
-  }
+  return loadJson(SESSION_STORAGE_KEY, null);
 }
 
 function enterApp(user) {
@@ -240,12 +297,37 @@ function enterApp(user) {
 }
 
 function resetDemo() {
-  localStorage.removeItem("myfitclub:user");
+  localStorage.removeItem(SESSION_STORAGE_KEY);
   state.currentUser = null;
   elements.appScreen.classList.add("hidden");
   elements.inviteScreen.classList.remove("hidden");
   elements.resetDemo.classList.add("hidden");
-  elements.inviteError.textContent = "";
+  elements.authError.textContent = "";
+  elements.authSuccess.textContent = "";
+}
+
+function setAuthMode(mode) {
+  state.authMode = mode;
+  const isSignup = mode === "signup";
+
+  elements.authTabs.forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.authMode === mode);
+  });
+  elements.signupOnlyFields.forEach((field) => field.classList.toggle("hidden", !isSignup));
+  elements.loginOnlyFields.forEach((field) => field.classList.toggle("hidden", isSignup));
+  elements.authSubmit.textContent = isSignup ? "Создать аккаунт" : "Войти";
+  elements.memberPassword.autocomplete = isSignup ? "new-password" : "current-password";
+
+  if (!isSignup && normalizeEmail(elements.memberEmail.value) === "new-client@myfitclub.demo") {
+    elements.memberEmail.value = "anna@myfitclub.demo";
+  }
+
+  if (isSignup && normalizeEmail(elements.memberEmail.value) === "anna@myfitclub.demo") {
+    elements.memberEmail.value = "new-client@myfitclub.demo";
+  }
+
+  elements.authError.textContent = "";
+  elements.authSuccess.textContent = "";
 }
 
 function renderClubMessages() {
@@ -356,26 +438,61 @@ function activateView(viewName) {
   });
 }
 
-elements.inviteForm.addEventListener("submit", (event) => {
+elements.authForm.addEventListener("submit", (event) => {
   event.preventDefault();
+  elements.authError.textContent = "";
+  elements.authSuccess.textContent = "";
+
+  const email = normalizeEmail(elements.memberEmail.value);
+  const password = elements.memberPassword.value.trim();
+  const users = loadUsers();
+
+  if (!email || !password) {
+    elements.authError.textContent = "Введите email и пароль.";
+    return;
+  }
+
+  if (state.authMode === "login") {
+    const user = users.find(
+      (candidate) => candidate.email === email && candidate.password === password,
+    );
+
+    if (!user) {
+      elements.authError.textContent =
+        "Аккаунт не найден или пароль неверный. Для демо используйте anna@myfitclub.demo / fitclub.";
+      return;
+    }
+
+    const publicUser = toPublicUser(user);
+    saveSession(publicUser);
+    enterApp(publicUser);
+    return;
+  }
+
   const code = normalizeCode(elements.inviteCode.value);
   const invite = inviteCodes[code];
 
   if (!invite) {
-    elements.inviteError.textContent =
+    elements.authError.textContent =
       "Неверный пригласительный код. Попробуйте CLIENT2026, TRAINER2026 или ADMIN2026.";
     return;
   }
 
-  const name = elements.memberName.value.trim() || invite.defaultName;
-  const user = {
-    ...invite,
-    name,
-    code,
-  };
+  if (users.some((user) => user.email === email)) {
+    elements.authError.textContent =
+      "Такой email уже зарегистрирован. Переключитесь на вкладку Вход.";
+    return;
+  }
 
-  saveSession(user);
-  enterApp(user);
+  const name = elements.memberName.value.trim() || invite.defaultName;
+  const user = createUser({ name, email, password, code });
+  users.push(user);
+  saveUsers(users);
+
+  const publicUser = toPublicUser(user);
+  elements.authSuccess.textContent = "Аккаунт создан. Входим в MyFitClub...";
+  saveSession(publicUser);
+  enterApp(publicUser);
 });
 
 elements.clubMessageForm.addEventListener("submit", (event) => {
@@ -399,6 +516,10 @@ elements.clubMessageForm.addEventListener("submit", (event) => {
   });
   elements.clubMessageInput.value = "";
   renderClubMessages();
+});
+
+elements.authTabs.forEach((tab) => {
+  tab.addEventListener("click", () => setAuthMode(tab.dataset.authMode));
 });
 
 elements.tabs.forEach((tab) => {
@@ -431,7 +552,9 @@ elements.scheduleList.addEventListener("click", (event) => {
 
 elements.resetDemo.addEventListener("click", resetDemo);
 
+seedDemoUsers();
 state.bookedScheduleIds = new Set(loadBookings());
+setAuthMode("signup");
 renderDirectDialogs();
 renderGroups();
 renderSchedule();

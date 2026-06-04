@@ -265,6 +265,31 @@ button {
   align-self: end;
 }
 
+.auth-toggle {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.auth-tab {
+  min-height: 42px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.auth-tab.active {
+  background: rgba(52, 232, 158, 0.17);
+  color: var(--text);
+}
+
 .invite-card label {
   display: block;
   margin: 18px 0 8px;
@@ -313,11 +338,19 @@ button {
   color: var(--text);
 }
 
-.form-error {
+.form-error,
+.form-success {
   min-height: 22px;
   margin: 14px 0 0;
-  color: var(--danger);
   font-weight: 700;
+}
+
+.form-error {
+  color: var(--danger);
+}
+
+.form-success {
+  color: var(--green);
 }
 
 .public-section {
@@ -359,7 +392,8 @@ button {
 }
 
 .dashboard.hidden,
-.hidden {
+.hidden,
+.invite-card .hidden {
   display: none;
 }
 
