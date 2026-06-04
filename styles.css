@@ -732,6 +732,41 @@ button {
   font-size: 2rem;
 }
 
+
+.database-panel {
+  margin-top: 16px;
+}
+
+.database-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.database-grid article {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.database-grid strong,
+.database-grid span {
+  display: block;
+}
+
+.database-grid strong {
+  color: var(--text);
+  font-size: 1.7rem;
+}
+
+.database-grid span {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
 .admin-panel {
   margin-top: 16px;
 }

@@ -1,6 +1,4 @@
-const USERS_STORAGE_KEY = "myfitclub:users";
 const SESSION_STORAGE_KEY = "myfitclub:user";
-const BOOKINGS_STORAGE_KEY = "myfitclub:bookings";
 
 const inviteCodes = {
   CLIENT2026: {
@@ -27,23 +25,7 @@ const state = {
   authMode: "signup",
   currentUser: null,
   bookedScheduleIds: new Set(),
-  clubMessages: [
-    {
-      author: "Елена, админ",
-      text: "Добро пожаловать в MyFitClub! Здесь будут новости клуба, объявления и важные изменения.",
-      role: "admin",
-    },
-    {
-      author: "Мария, тренер",
-      text: "Сегодня в 18:00 йога в зале 2. Возьмите коврики и воду.",
-      role: "trainer",
-    },
-    {
-      author: "Игорь",
-      text: "Кто идет на функциональную тренировку в субботу?",
-      role: "client",
-    },
-  ],
+  clubMessages: [],
 };
 
 const directDialogs = [
@@ -131,24 +113,6 @@ const schedule = [
   },
 ];
 
-const notifications = [
-  {
-    time: "Сегодня, 17:00",
-    title: "Напоминание о тренировке",
-    text: "Йога и мобильность начнется через час. Возьмите воду и коврик.",
-  },
-  {
-    time: "Завтра, 09:00",
-    title: "Новое объявление клуба",
-    text: "Открыта запись на субботнюю функциональную тренировку.",
-  },
-  {
-    time: "Пн, 08:30",
-    title: "Челлендж недели",
-    text: "Проверьте группу Питание и отметьте первый день дневника воды.",
-  },
-];
-
 const elements = {
   inviteScreen: document.querySelector("#invite-screen"),
   appScreen: document.querySelector("#app-screen"),
@@ -175,6 +139,11 @@ const elements = {
   scheduleList: document.querySelector("#schedule-list"),
   bookingCount: document.querySelector("#booking-count"),
   notificationList: document.querySelector("#notification-list"),
+  dbUsersCount: document.querySelector("#db-users-count"),
+  dbMessagesCount: document.querySelector("#db-messages-count"),
+  dbBookingsCount: document.querySelector("#db-bookings-count"),
+  dbNotificationsCount: document.querySelector("#db-notifications-count"),
+  dbCodesCount: document.querySelector("#db-codes-count"),
   authTabs: document.querySelectorAll("[data-auth-mode]"),
   signupOnlyFields: document.querySelectorAll(".signup-only"),
   loginOnlyFields: document.querySelectorAll(".login-only"),
@@ -211,11 +180,11 @@ function loadJson(key, fallback) {
 }
 
 function saveUsers(users) {
-  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+  MyFitClubStore.replace("users", users);
 }
 
 function loadUsers() {
-  return loadJson(USERS_STORAGE_KEY, []);
+  return MyFitClubStore.list("users");
 }
 
 function toPublicUser(user) {
@@ -263,14 +232,17 @@ function saveSession(user) {
 }
 
 function loadBookings() {
-  return loadJson(BOOKINGS_STORAGE_KEY, []);
+  return MyFitClubStore.list("bookings").map((booking) => booking.scheduleId || booking);
 }
 
 function saveBookings() {
-  localStorage.setItem(
-    BOOKINGS_STORAGE_KEY,
-    JSON.stringify([...state.bookedScheduleIds]),
-  );
+  const bookings = [...state.bookedScheduleIds].map((scheduleId) => ({
+    id: `${state.currentUser?.id || "guest"}-${scheduleId}`,
+    userId: state.currentUser?.id || "guest",
+    scheduleId,
+    createdAt: new Date().toISOString(),
+  }));
+  MyFitClubStore.replace("bookings", bookings);
 }
 
 function loadSession() {
@@ -294,6 +266,7 @@ function enterApp(user) {
   renderSchedule();
   renderNotifications();
   updateBookingCount();
+  renderDatabaseStats();
 }
 
 function resetDemo() {
@@ -411,7 +384,7 @@ function renderSchedule() {
 }
 
 function renderNotifications() {
-  elements.notificationList.innerHTML = notifications
+  elements.notificationList.innerHTML = MyFitClubStore.list("notifications")
     .map(
       (notification) => `
         <article class="notification-card">
@@ -426,6 +399,14 @@ function renderNotifications() {
 
 function updateBookingCount() {
   elements.bookingCount.textContent = state.bookedScheduleIds.size;
+}
+
+function renderDatabaseStats() {
+  elements.dbUsersCount.textContent = MyFitClubStore.count("users");
+  elements.dbMessagesCount.textContent = MyFitClubStore.count("clubMessages");
+  elements.dbBookingsCount.textContent = MyFitClubStore.count("bookings");
+  elements.dbNotificationsCount.textContent = MyFitClubStore.count("notifications");
+  elements.dbCodesCount.textContent = MyFitClubStore.count("invitationCodes");
 }
 
 function activateView(viewName) {
@@ -471,10 +452,19 @@ elements.authForm.addEventListener("submit", (event) => {
 
   const code = normalizeCode(elements.inviteCode.value);
   const invite = inviteCodes[code];
+  const storedInvite = MyFitClubStore.list("invitationCodes").find(
+    (candidate) => candidate.code === code && candidate.isActive,
+  );
 
-  if (!invite) {
+  if (!invite || !storedInvite) {
     elements.authError.textContent =
       "Неверный пригласительный код. Попробуйте CLIENT2026, TRAINER2026 или ADMIN2026.";
+    return;
+  }
+
+  if (storedInvite.usedCount >= storedInvite.usageLimit) {
+    elements.authError.textContent =
+      "Лимит этого пригласительного кода исчерпан. Нужен новый код от администратора.";
     return;
   }
 
@@ -488,6 +478,13 @@ elements.authForm.addEventListener("submit", (event) => {
   const user = createUser({ name, email, password, code });
   users.push(user);
   saveUsers(users);
+  MyFitClubStore.update((db) => {
+    db.invitationCodes = db.invitationCodes.map((inviteCode) =>
+      inviteCode.code === code
+        ? { ...inviteCode, usedCount: inviteCode.usedCount + 1 }
+        : inviteCode,
+    );
+  });
 
   const publicUser = toPublicUser(user);
   elements.authSuccess.textContent = "Аккаунт создан. Входим в MyFitClub...";
@@ -508,14 +505,17 @@ elements.clubMessageForm.addEventListener("submit", (event) => {
     return;
   }
 
-  state.clubMessages.push({
+  const message = MyFitClubStore.add("clubMessages", {
     author: state.currentUser.name,
     text,
     role: state.currentUser.role,
-    mine: true,
+    userId: state.currentUser.id,
+    createdAt: new Date().toISOString(),
   });
+  state.clubMessages.push({ ...message, mine: true });
   elements.clubMessageInput.value = "";
   renderClubMessages();
+  renderDatabaseStats();
 });
 
 elements.authTabs.forEach((tab) => {
@@ -548,11 +548,13 @@ elements.scheduleList.addEventListener("click", (event) => {
   saveBookings();
   renderSchedule();
   updateBookingCount();
+  renderDatabaseStats();
 });
 
 elements.resetDemo.addEventListener("click", resetDemo);
 
 seedDemoUsers();
+state.clubMessages = MyFitClubStore.list("clubMessages");
 state.bookedScheduleIds = new Set(loadBookings());
 setAuthMode("signup");
 renderDirectDialogs();
@@ -560,6 +562,7 @@ renderGroups();
 renderSchedule();
 renderNotifications();
 updateBookingCount();
+renderDatabaseStats();
 elements.resetDemo.classList.add("hidden");
 
 const savedUser = loadSession();

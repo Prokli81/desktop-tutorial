@@ -7,6 +7,7 @@ and admins can communicate, view schedules and stay inside one club space.
 ## What is included
 
 - local registration and login prototype with invitation-code role assignment;
+- local data-store prototype for users, invite codes, messages, bookings and notifications;
 - club dashboard;
 - main club chat with local demo messages;
 - private-message overview;
@@ -35,9 +36,10 @@ python3 -m http.server 4173
 
 Then open `http://localhost:4173`.
 
-The prototype stores demo accounts, session and class bookings in browser
-`localStorage`, so it can show registration, login, role switching and booking
-state without a backend.
+The prototype stores demo accounts, session, messages, invite codes,
+notifications and class bookings in browser `localStorage`, so it can show
+registration, login, role switching, booking state and collection counters
+without a backend.
 
 ## Product documentation
 
@@ -47,7 +49,8 @@ See:
   scope, screens, data model and recommended implementation stack;
 - `docs/step-by-step.md` for the ordered development path from prototype to a
   real mobile app;
-- `docs/auth-flow.md` for the registration, login and invite-code flow.
+- `docs/auth-flow.md` for the registration, login and invite-code flow;
+- `docs/database-plan.md` for the local database collections and Firebase migration path.
 
 ## Next product steps
 

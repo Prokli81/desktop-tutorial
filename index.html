@@ -346,6 +346,24 @@
               </p>
             </div>
 
+            <div class="panel database-panel">
+              <div class="panel-heading">
+                <h3>Локальная база прототипа</h3>
+                <span class="badge">localStorage</span>
+              </div>
+              <p>
+                Сейчас данные хранятся как коллекции в браузере. Позже этот слой
+                заменяется на Firestore или backend без изменения идеи экранов.
+              </p>
+              <div class="database-grid">
+                <article><strong id="db-users-count">0</strong><span>Users</span></article>
+                <article><strong id="db-messages-count">0</strong><span>Messages</span></article>
+                <article><strong id="db-bookings-count">0</strong><span>Bookings</span></article>
+                <article><strong id="db-notifications-count">0</strong><span>Notifications</span></article>
+                <article><strong id="db-codes-count">0</strong><span>Invite codes</span></article>
+              </div>
+            </div>
+
             <div class="admin-panel hidden" id="admin-panel">
               <div class="section-heading compact">
                 <div>
@@ -378,6 +396,7 @@
       </main>
     </div>
 
+    <script src="data-store.js" defer></script>
     <script src="app.js" defer></script>
   </body>
 </html>
