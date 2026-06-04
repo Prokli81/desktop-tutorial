@@ -1,4 +1,5 @@
 const SESSION_STORAGE_KEY = "myfitclub:user";
+const ONBOARDING_STORAGE_KEY = "myfitclub:onboarding-complete";
 
 const inviteCodes = {
   CLIENT2026: {
@@ -24,12 +25,18 @@ const inviteCodes = {
 const state = {
   authMode: "signup",
   currentUser: null,
+  onboardingSlide: 0,
   bookedScheduleIds: new Set(),
   activeChatId: "club-main",
   previousView: "club-chat",
 };
 
 const elements = {
+  onboardingScreen: document.querySelector("#onboarding-screen"),
+  onboardingSlides: document.querySelector("#onboarding-slides"),
+  onboardingDots: document.querySelector("#onboarding-dots"),
+  onboardingNext: document.querySelector("#onboarding-next"),
+  onboardingSkip: document.querySelector("#onboarding-skip"),
   inviteScreen: document.querySelector("#invite-screen"),
   appScreen: document.querySelector("#app-screen"),
   authForm: document.querySelector("#auth-form"),
@@ -215,6 +222,7 @@ function loadSession() {
 
 function enterApp(user) {
   state.currentUser = user;
+  elements.onboardingScreen.classList.add("hidden");
   elements.inviteScreen.classList.add("hidden");
   elements.appScreen.classList.remove("hidden");
   elements.resetDemo.classList.remove("hidden");
@@ -227,66 +235,63 @@ function enterApp(user) {
   elements.adminPanel.classList.toggle("hidden", user.role !== "admin");
 
   renderClubMessages();
-  renderSchedule();
-  renderNotifications();
-  updateBookingCount();
-  renderDatabaseStats();
+  refreshAppData();
 }
 
 function resetDemo() {
   localStorage.removeItem(SESSION_STORAGE_KEY);
   state.currentUser = null;
   elements.appScreen.classList.add("hidden");
+  elements.onboardingScreen.classList.add("hidden");
   elements.inviteScreen.classList.remove("hidden");
   elements.resetDemo.classList.add("hidden");
   elements.authError.textContent = "";
   elements.authSuccess.textContent = "";
 }
 
+function isOnboardingComplete() {
+  return localStorage.getItem(ONBOARDING_STORAGE_KEY) === "1";
+}
+
+function completeOnboarding() {
+  localStorage.setItem(ONBOARDING_STORAGE_KEY, "1");
+  elements.onboardingScreen.classList.add("hidden");
+  elements.inviteScreen.classList.remove("hidden");
+}
+
+function goToOnboardingSlide(index) {
+  const slides = elements.onboardingSlides.querySelectorAll(".onboarding-slide");
+  const dots = elements.onboardingDots.querySelectorAll(".dot");
+  const safeIndex = Math.max(0, Math.min(index, slides.length - 1));
+
+  state.onboardingSlide = safeIndex;
+  slides.forEach((slide, slideIndex) => {
+    slide.classList.toggle("active", slideIndex === safeIndex);
+  });
+  dots.forEach((dot, dotIndex) => {
+    dot.classList.toggle("active", dotIndex === safeIndex);
+  });
+  elements.onboardingNext.textContent =
+    safeIndex === slides.length - 1 ? "Войти по коду" : "Далее";
+}
+
+function initOnboarding() {
+  if (isOnboardingComplete()) {
+    elements.onboardingScreen.classList.add("hidden");
+    elements.inviteScreen.classList.remove("hidden");
+    return;
+  }
+
+  elements.onboardingScreen.classList.remove("hidden");
+  elements.inviteScreen.classList.add("hidden");
+  goToOnboardingSlide(0);
+}
+
 function setAuthMode(mode) {
   state.authMode = mode;
   const isSignup = mode === "signup";
 
-  elements.chatDetailForm.addEventListener("submit", (event) => {
-  event.preventDefault();
-
-  if (!state.currentUser) {
-    return;
-  }
-
-  const text = elements.chatDetailInput.value.trim();
-
-  if (!text) {
-    return;
-  }
-
-  createMessage(state.activeChatId, text);
-  elements.chatDetailInput.value = "";
-  renderMessageList(elements.chatDetailList, state.activeChatId);
-  renderDirectDialogs();
-  renderGroups();
-  renderClubMessages();
-});
-
-elements.directList.addEventListener("click", (event) => {
-  const row = event.target.closest("[data-chat-id]");
-
-  if (row) {
-    openChat(row.dataset.chatId, row.dataset.sourceView);
-  }
-});
-
-elements.groupList.addEventListener("click", (event) => {
-  const row = event.target.closest("[data-chat-id]");
-
-  if (row) {
-    openChat(row.dataset.chatId, row.dataset.sourceView);
-  }
-});
-
-elements.chatBackButton.addEventListener("click", () => activateView(state.previousView));
-
-elements.authTabs.forEach((tab) => {
+  elements.authTabs.forEach((tab) => {
     tab.classList.toggle("active", tab.dataset.authMode === mode);
   });
   elements.signupOnlyFields.forEach((field) => field.classList.toggle("hidden", !isSignup));
@@ -775,8 +780,25 @@ elements.adminScheduleForm.addEventListener("submit", (event) => {
   renderAdminPanel();
 });
 
+
+elements.onboardingNext.addEventListener("click", () => {
+  const slides = elements.onboardingSlides.querySelectorAll(".onboarding-slide");
+  if (state.onboardingSlide < slides.length - 1) {
+    goToOnboardingSlide(state.onboardingSlide + 1);
+    return;
+  }
+  completeOnboarding();
+});
+
+elements.onboardingSkip.addEventListener("click", completeOnboarding);
+
+elements.onboardingDots.querySelectorAll(".dot").forEach((dot) => {
+  dot.addEventListener("click", () => goToOnboardingSlide(Number(dot.dataset.slideTo)));
+});
+
 elements.resetDemo.addEventListener("click", resetDemo);
 
+initOnboarding();
 seedDemoUsers();
 state.bookedScheduleIds = new Set(loadBookings());
 setAuthMode("signup");
@@ -786,6 +808,7 @@ elements.resetDemo.classList.add("hidden");
 const savedUser = loadSession();
 
 if (savedUser) {
+  completeOnboarding();
   enterApp(savedUser);
 }
 

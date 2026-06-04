@@ -31,7 +31,56 @@
       </header>
 
       <main>
-        <section class="hero" id="invite-screen">
+        <section class="onboarding" id="onboarding-screen" aria-label="Знакомство с MyFitClub">
+          <div class="onboarding-shell">
+            <button class="ghost-button onboarding-skip" id="onboarding-skip" type="button">Пропустить</button>
+
+            <div class="onboarding-slides" id="onboarding-slides">
+              <article class="onboarding-slide active" data-slide="0">
+                <div class="onboarding-visual welcome-visual" aria-hidden="true">
+                  <div class="onboarding-logo">M</div>
+                  <div class="onboarding-glow"></div>
+                </div>
+                <p class="eyebrow">шаг 1 из 3</p>
+                <h2>Добро пожаловать в MyFitClub</h2>
+                <p>Закрытое пространство твоего фитнес-клуба только для своих людей.</p>
+              </article>
+
+              <article class="onboarding-slide" data-slide="1">
+                <div class="onboarding-visual chat-visual" aria-hidden="true">
+                  <div class="onboarding-bubble left"></div>
+                  <div class="onboarding-bubble right"></div>
+                  <div class="onboarding-bubble left short"></div>
+                </div>
+                <p class="eyebrow">шаг 2 из 3</p>
+                <h2>Общение и поддержка</h2>
+                <p>Чаты, тренеры, группы и объявления клуба — всё в одном приложении.</p>
+              </article>
+
+              <article class="onboarding-slide" data-slide="2">
+                <div class="onboarding-visual schedule-visual" aria-hidden="true">
+                  <div class="onboarding-schedule"></div>
+                  <div class="onboarding-schedule active"></div>
+                  <div class="onboarding-schedule"></div>
+                </div>
+                <p class="eyebrow">шаг 3 из 3</p>
+                <h2>Расписание и прогресс</h2>
+                <p>Записывайся на занятия, следи за активностью и не пропускай важное.</p>
+              </article>
+            </div>
+
+            <div class="onboarding-footer">
+              <div class="onboarding-dots" id="onboarding-dots" aria-label="Прогресс онбординга">
+                <button class="dot active" type="button" data-slide-to="0" aria-label="Слайд 1"></button>
+                <button class="dot" type="button" data-slide-to="1" aria-label="Слайд 2"></button>
+                <button class="dot" type="button" data-slide-to="2" aria-label="Слайд 3"></button>
+              </div>
+              <button class="primary-button" id="onboarding-next" type="button">Далее</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="hero hidden" id="invite-screen">
           <div class="hero-copy">
             <p class="eyebrow">только для своих</p>
             <h2>Приватное приложение для клиентов и тренеров фитнес-клуба</h2>
@@ -352,6 +401,20 @@
 
             <div class="screen-map-grid">
               <article class="screen-card featured">
+                <div class="screen-preview welcome-preview">
+                  <span class="screen-notch"></span>
+                  <div class="preview-pill"></div>
+                  <div class="preview-line wide"></div>
+                  <div class="preview-button"></div>
+                </div>
+                <div>
+                  <span class="screen-number">00</span>
+                  <h3>Онбординг</h3>
+                  <p>Три приветственных экрана перед входом по пригласительному коду.</p>
+                </div>
+              </article>
+
+              <article class="screen-card">
                 <div class="screen-preview auth-preview">
                   <span class="screen-notch"></span>
                   <div class="preview-pill"></div>

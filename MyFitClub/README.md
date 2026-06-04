@@ -16,7 +16,7 @@ and admins can communicate, view schedules and stay inside one club space.
 - notification center;
 - profile screen;
 - admin panel shown only for the admin role, with local forms for invite codes, groups and schedule events;
-- screen map/design section inside the prototype;
+- onboarding flow with 3 welcome slides, screen map/design section inside the prototype;
 - PWA setup with manifest, app icon and service worker;
 - GitHub Pages workflow for publishing the `MyFitClub/` folder online;
 - Russian product blueprint in `docs/product-blueprint.md`;
