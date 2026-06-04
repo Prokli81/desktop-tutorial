@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="MyFitClub - закрытое пространство фитнес-клуба для общения, расписания и клубного сообщества."
+    />
+    <meta name="theme-color" content="#07130f" />
+    <title>MyFitClub</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">M</div>
+          <div>
+            <p class="eyebrow">закрытый фитнес-клуб</p>
+            <h1>MyFitClub</h1>
+          </div>
+        </div>
+        <button class="ghost-button" id="reset-demo" type="button">Сменить роль</button>
+      </header>
+
+      <main>
+        <section class="hero" id="invite-screen">
+          <div class="hero-copy">
+            <p class="eyebrow">только для своих</p>
+            <h2>Приватное приложение для клиентов и тренеров фитнес-клуба</h2>
+            <p>
+              Войдите по пригласительному коду, чтобы попасть в общий чат,
+              группы, расписание и личную связь с тренером.
+            </p>
+          </div>
+
+          <form class="invite-card" id="invite-form">
+            <label for="member-name">Ваше имя</label>
+            <input id="member-name" name="member-name" type="text" value="Анна" autocomplete="name" />
+
+            <label for="invite-code">Пригласительный код</label>
+            <input
+              id="invite-code"
+              name="invite-code"
+              type="text"
+              value="CLIENT2026"
+              autocomplete="off"
+              aria-describedby="invite-help"
+            />
+            <p class="hint" id="invite-help">
+              Демо-коды: CLIENT2026, TRAINER2026, ADMIN2026
+            </p>
+            <button class="primary-button" type="submit">Войти в клуб</button>
+            <p class="form-error" id="invite-error" role="alert"></p>
+          </form>
+        </section>
+
+        <section class="dashboard hidden" id="app-screen" aria-live="polite">
+          <nav class="tabs" aria-label="Основные разделы MyFitClub">
+            <button class="tab active" type="button" data-view="home">Главная</button>
+            <button class="tab" type="button" data-view="club-chat">Чат</button>
+            <button class="tab" type="button" data-view="direct">Личные</button>
+            <button class="tab" type="button" data-view="groups">Группы</button>
+            <button class="tab" type="button" data-view="schedule">Расписание</button>
+            <button class="tab" type="button" data-view="profile">Профиль</button>
+          </nav>
+
+          <section class="view active" id="home" data-view-panel>
+            <div class="welcome-card">
+              <div>
+                <p class="eyebrow" id="role-label">клиент клуба</p>
+                <h2 id="welcome-title">Привет, Анна!</h2>
+                <p>
+                  Сегодня в клубе: силовая тренировка, йога и обновления в
+                  общем чате.
+                </p>
+              </div>
+              <div class="streak">
+                <span>7</span>
+                дней активности
+              </div>
+            </div>
+
+            <div class="metric-grid">
+              <article class="metric-card">
+                <span>Ближайшее занятие</span>
+                <strong>Йога, 18:00</strong>
+              </article>
+              <article class="metric-card">
+                <span>Новые сообщения</span>
+                <strong>5</strong>
+              </article>
+              <article class="metric-card">
+                <span>Группы</span>
+                <strong>5 тем</strong>
+              </article>
+            </div>
+
+            <div class="content-grid">
+              <article class="panel">
+                <div class="panel-heading">
+                  <h3>Объявления клуба</h3>
+                  <span class="badge">новое</span>
+                </div>
+                <p>
+                  В субботу пройдет открытая тренировка по функциональному
+                  тренингу. Запись доступна у администратора.
+                </p>
+              </article>
+              <article class="panel">
+                <div class="panel-heading">
+                  <h3>Фокус недели</h3>
+                  <span class="badge badge-blue">питание</span>
+                </div>
+                <p>
+                  Тренеры запускают мини-челлендж: 5 дней без пропусков воды и
+                  дневник питания в группе "Питание".
+                </p>
+              </article>
+            </div>
+          </section>
+
+          <section class="view" id="club-chat" data-view-panel>
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">общий чат</p>
+                <h2>Клубная лента</h2>
+              </div>
+              <span class="online-dot">42 онлайн</span>
+            </div>
+            <div class="chat-card" id="club-chat-list"></div>
+            <form class="message-form" id="club-message-form">
+              <input id="club-message-input" type="text" placeholder="Написать сообщение клубу..." />
+              <button class="primary-button" type="submit">Отправить</button>
+            </form>
+          </section>
+
+          <section class="view" id="direct" data-view-panel>
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">личные сообщения</p>
+                <h2>Связь с тренером</h2>
+              </div>
+            </div>
+            <div class="dialog-list" id="direct-list"></div>
+          </section>
+
+          <section class="view" id="groups" data-view-panel>
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">групповые чаты</p>
+                <h2>Темы клуба</h2>
+              </div>
+            </div>
+            <div class="group-grid" id="group-list"></div>
+          </section>
+
+          <section class="view" id="schedule" data-view-panel>
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">расписание</p>
+                <h2>Ближайшие занятия</h2>
+              </div>
+            </div>
+            <div class="schedule-list" id="schedule-list"></div>
+          </section>
+
+          <section class="view" id="profile" data-view-panel>
+            <div class="profile-card">
+              <div class="avatar" id="profile-avatar">А</div>
+              <div>
+                <p class="eyebrow" id="profile-role">клиент</p>
+                <h2 id="profile-name">Анна</h2>
+                <p>Цель: улучшить форму, питание и регулярность тренировок.</p>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-heading">
+                <h3>Настройки доступа</h3>
+                <span class="badge">по коду</span>
+              </div>
+              <p>
+                В этой демо-версии роль назначается пригласительным кодом:
+                клиент, тренер или администратор.
+              </p>
+            </div>
+
+            <div class="admin-panel hidden" id="admin-panel">
+              <div class="section-heading compact">
+                <div>
+                  <p class="eyebrow">админ-панель</p>
+                  <h2>Управление клубом</h2>
+                </div>
+              </div>
+              <div class="admin-grid">
+                <article>
+                  <strong>3</strong>
+                  активных кода
+                </article>
+                <article>
+                  <strong>128</strong>
+                  пользователей
+                </article>
+                <article>
+                  <strong>9</strong>
+                  занятий в расписании
+                </article>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
