@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="MyFitClub icon">
+  <defs>
+    <linearGradient id="bg" x1="64" x2="448" y1="64" y2="448" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#34e89e"/>
+      <stop offset="1" stop-color="#5cb8ff"/>
+    </linearGradient>
+    <linearGradient id="shadow" x1="128" x2="384" y1="112" y2="400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07130f" stop-opacity=".95"/>
+      <stop offset="1" stop-color="#10271f" stop-opacity=".9"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="#07130f"/>
+  <rect x="48" y="48" width="416" height="416" rx="104" fill="url(#bg)"/>
+  <rect x="88" y="88" width="336" height="336" rx="82" fill="url(#shadow)"/>
+  <path fill="#34e89e" d="M142 318V194h41l38 65 38-65h41v124h-38v-68l-30 49h-22l-30-49v68h-38Z"/>
+  <path fill="#f3fff9" d="M320 318V194h52c29 0 48 17 48 44 0 25-19 43-48 43h-13v37h-39Zm39-70h11c8 0 13-4 13-11s-5-11-13-11h-11v22Z"/>
+  <path fill="#5cb8ff" d="M130 362h252c12 0 22 10 22 22s-10 22-22 22H130c-12 0-22-10-22-22s10-22 22-22Z"/>
+</svg>

@@ -3,9 +3,19 @@
   "short_name": "MyFitClub",
   "description": "Закрытое приложение фитнес-клуба для общения, расписания и клубного сообщества.",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#07130f",
   "theme_color": "#07130f",
   "lang": "ru",
-  "icons": []
+  "categories": ["fitness", "health", "social"],
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
 }

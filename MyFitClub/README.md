@@ -16,6 +16,8 @@ and admins can communicate, view schedules and stay inside one club space.
 - notification center;
 - profile screen;
 - admin panel shown only for the admin role, with local forms for invite codes, groups and schedule events;
+- PWA setup with manifest, app icon and service worker;
+- GitHub Pages workflow for publishing the `MyFitClub/` folder online;
 - Russian product blueprint in `docs/product-blueprint.md`;
 - step-by-step development order in `docs/step-by-step.md`.
 
@@ -53,7 +55,8 @@ See:
 - `docs/auth-flow.md` for the registration, login and invite-code flow;
 - `docs/database-plan.md` for the local database collections and Firebase migration path;
 - `docs/chat-flow.md` for the unified chat/message model;
-- `docs/admin-panel.md` for admin actions and production rules.
+- `docs/admin-panel.md` for admin actions and production rules;
+- `docs/deployment.md` for GitHub Pages publishing and PWA installation.
 
 ## Next product steps
 
@@ -66,3 +69,9 @@ or app builder stack such as FlutterFlow + Firebase, then replace demo data with
 - push notifications;
 - admin management screens;
 - iOS/Android packaging.
+
+## Publish online
+
+The repository includes `.github/workflows/pages.yml` to deploy the `MyFitClub/`
+folder to GitHub Pages after the workflow is enabled and merged to `main`.
+See `docs/deployment.md` for the exact steps.
