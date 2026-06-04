@@ -15,7 +15,8 @@ and admins can communicate, view schedules and stay inside one club space.
 - notification center;
 - profile screen;
 - admin panel shown only for the admin role;
-- Russian product blueprint in `docs/product-blueprint.md`.
+- Russian product blueprint in `docs/product-blueprint.md`;
+- step-by-step development order in `docs/step-by-step.md`.
 
 ## Demo invitation codes
 
@@ -39,8 +40,12 @@ it can show role switching and booking state without a backend.
 
 ## Product documentation
 
-See `docs/product-blueprint.md` for the Russian-language product plan, roles,
-MVP scope, screens, data model and recommended implementation stack.
+See:
+
+- `docs/product-blueprint.md` for the Russian-language product plan, roles, MVP
+  scope, screens, data model and recommended implementation stack;
+- `docs/step-by-step.md` for the ordered development path from prototype to a
+  real mobile app.
 
 ## Next product steps
 

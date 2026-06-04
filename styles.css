@@ -187,11 +187,77 @@ button {
   letter-spacing: -0.08em;
 }
 
-.hero-copy p:last-child {
+.hero-copy > p {
   max-width: 640px;
   color: var(--muted);
   font-size: 1.08rem;
   line-height: 1.65;
+}
+
+.value-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 18px 0 0;
+}
+
+.value-list span {
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.phone-preview {
+  width: min(310px, 100%);
+  margin-top: 26px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 34px;
+  background: rgba(3, 18, 13, 0.72);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+}
+
+.phone-preview-bar {
+  width: 72px;
+  height: 5px;
+  margin: 0 auto 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.phone-preview-card {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 14px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.phone-preview-card.accent {
+  background: linear-gradient(135deg, rgba(52, 232, 158, 0.28), rgba(92, 184, 255, 0.18));
+}
+
+.phone-preview-card.compact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.phone-preview-card span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.phone-preview-card.compact span {
+  padding: 7px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .invite-card {
@@ -233,11 +299,63 @@ button {
   font-size: 0.9rem;
 }
 
+.access-note {
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.access-note strong {
+  color: var(--text);
+}
+
 .form-error {
   min-height: 22px;
   margin: 14px 0 0;
   color: var(--danger);
   font-weight: 700;
+}
+
+.public-section {
+  margin: 24px 0;
+}
+
+.roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.roadmap-card {
+  min-height: 210px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  background: rgba(18, 39, 32, 0.72);
+}
+
+.roadmap-card.active {
+  border-color: rgba(52, 232, 158, 0.44);
+  background: linear-gradient(135deg, rgba(52, 232, 158, 0.16), rgba(18, 39, 32, 0.72));
+}
+
+.roadmap-card span {
+  color: var(--green);
+  font-weight: 900;
+}
+
+.roadmap-card h3 {
+  margin: 18px 0 10px;
+}
+
+.roadmap-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .dashboard.hidden,
@@ -431,6 +549,19 @@ button {
   line-height: 1.55;
 }
 
+.step-list {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding-left: 22px;
+  color: var(--muted);
+}
+
+.step-list li::marker {
+  color: var(--green);
+  font-weight: 900;
+}
+
 .chat-card {
   display: grid;
   gap: 12px;
@@ -602,12 +733,17 @@ button {
   .metric-grid,
   .content-grid,
   .progress-layout,
+  .roadmap-grid,
   .admin-grid {
     grid-template-columns: 1fr;
   }
 
   .hero-copy {
     min-height: 460px;
+  }
+
+  .phone-preview {
+    width: 100%;
   }
 
   .welcome-card,
@@ -646,6 +782,7 @@ button {
   .group-card,
   .schedule-row,
   .notification-card,
+  .roadmap-card,
   .profile-card,
   .admin-panel {
     border-radius: 24px;

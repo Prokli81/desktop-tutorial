@@ -34,6 +34,27 @@
               Войдите по пригласительному коду, чтобы попасть в общий чат,
               группы, расписание и личную связь с тренером.
             </p>
+            <div class="value-list" aria-label="Ключевые преимущества">
+              <span>Чаты клуба</span>
+              <span>Запись на занятия</span>
+              <span>Push-уведомления</span>
+            </div>
+            <div class="phone-preview" aria-label="Превью мобильного приложения">
+              <div class="phone-preview-bar"></div>
+              <div class="phone-preview-card accent">
+                <span>Сегодня</span>
+                <strong>Йога в 18:00</strong>
+              </div>
+              <div class="phone-preview-card">
+                <span>Общий чат</span>
+                <strong>5 новых сообщений</strong>
+              </div>
+              <div class="phone-preview-card compact">
+                <span>Питание</span>
+                <span>Похудение</span>
+                <span>Новички</span>
+              </div>
+            </div>
           </div>
 
           <form class="invite-card" id="invite-form">
@@ -54,7 +75,43 @@
             </p>
             <button class="primary-button" type="submit">Войти в клуб</button>
             <p class="form-error" id="invite-error" role="alert"></p>
+            <div class="access-note">
+              <strong>Порядок проверки:</strong>
+              сначала зайдите как клиент, потом смените роль и попробуйте
+              администратора.
+            </div>
           </form>
+        </section>
+
+        <section class="public-section" id="product-steps">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">идём по порядку</p>
+              <h2>План развития MyFitClub</h2>
+            </div>
+          </div>
+          <div class="roadmap-grid">
+            <article class="roadmap-card active">
+              <span>01</span>
+              <h3>Дизайн и прототип</h3>
+              <p>Собрать понятные экраны, роли, чаты, расписание и визуальный стиль.</p>
+            </article>
+            <article class="roadmap-card">
+              <span>02</span>
+              <h3>Регистрация</h3>
+              <p>Добавить настоящие аккаунты и вход по пригласительному коду.</p>
+            </article>
+            <article class="roadmap-card">
+              <span>03</span>
+              <h3>База данных</h3>
+              <p>Сохранять пользователей, сообщения, записи и уведомления.</p>
+            </article>
+            <article class="roadmap-card">
+              <span>04</span>
+              <h3>Мобильная версия</h3>
+              <p>Упаковать приложение для iOS/Android или сделать PWA.</p>
+            </article>
+          </div>
         </section>
 
         <section class="dashboard hidden" id="app-screen" aria-live="polite">
@@ -128,6 +185,18 @@
             </div>
 
             <div class="content-grid">
+              <article class="panel">
+                <div class="panel-heading">
+                  <h3>Порядок работ</h3>
+                  <span class="badge">шаг 1</span>
+                </div>
+                <ol class="step-list">
+                  <li>Дизайн и прототип</li>
+                  <li>Настоящая регистрация</li>
+                  <li>База данных и чаты</li>
+                  <li>Мобильная упаковка</li>
+                </ol>
+              </article>
               <article class="panel">
                 <div class="panel-heading">
                   <h3>Объявления клуба</h3>
