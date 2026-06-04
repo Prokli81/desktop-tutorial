@@ -16,6 +16,7 @@ and admins can communicate, view schedules and stay inside one club space.
 - notification center;
 - profile screen;
 - admin panel shown only for the admin role, with local forms for invite codes, groups and schedule events;
+- screen map/design section inside the prototype;
 - PWA setup with manifest, app icon and service worker;
 - GitHub Pages workflow for publishing the `MyFitClub/` folder online;
 - Russian product blueprint in `docs/product-blueprint.md`;
@@ -56,7 +57,8 @@ See:
 - `docs/database-plan.md` for the local database collections and Firebase migration path;
 - `docs/chat-flow.md` for the unified chat/message model;
 - `docs/admin-panel.md` for admin actions and production rules;
-- `docs/deployment.md` for GitHub Pages publishing and PWA installation.
+- `docs/deployment.md` for GitHub Pages publishing and PWA installation;
+- `docs/design-system.md` for the visual system and screen responsibilities.
 
 ## Next product steps
 

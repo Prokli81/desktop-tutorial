@@ -165,6 +165,7 @@
             <button class="tab" type="button" data-view="groups">Группы</button>
             <button class="tab" type="button" data-view="schedule">Расписание</button>
             <button class="tab" type="button" data-view="notifications">Уведомления</button>
+            <button class="tab" type="button" data-view="screens">Экраны</button>
             <button class="tab hidden" type="button" data-view="chat-detail">Диалог</button>
             <button class="tab" type="button" data-view="profile">Профиль</button>
           </nav>
@@ -334,6 +335,124 @@
               </div>
             </div>
             <div class="notification-list" id="notification-list"></div>
+          </section>
+
+          <section class="view" id="screens" data-view-panel>
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">дизайн и экраны</p>
+                <h2>Карта интерфейса MyFitClub</h2>
+              </div>
+              <span class="badge">mobile first</span>
+            </div>
+            <p class="helper-text">
+              Этот раздел показывает, какие основные экраны нужны первой версии
+              приложения и какую задачу решает каждый экран.
+            </p>
+
+            <div class="screen-map-grid">
+              <article class="screen-card featured">
+                <div class="screen-preview auth-preview">
+                  <span class="screen-notch"></span>
+                  <div class="preview-pill"></div>
+                  <div class="preview-line wide"></div>
+                  <div class="preview-line"></div>
+                  <div class="preview-button"></div>
+                </div>
+                <div>
+                  <span class="screen-number">01</span>
+                  <h3>Вход и регистрация</h3>
+                  <p>Доступ только по пригласительному коду, роли и демо-аккаунт.</p>
+                </div>
+              </article>
+
+              <article class="screen-card">
+                <div class="screen-preview home-preview">
+                  <span class="screen-notch"></span>
+                  <div class="preview-card"></div>
+                  <div class="preview-row"><span></span><span></span></div>
+                </div>
+                <div>
+                  <span class="screen-number">02</span>
+                  <h3>Главная</h3>
+                  <p>Быстрый доступ к занятию, сообщениям, группам и плану недели.</p>
+                </div>
+              </article>
+
+              <article class="screen-card">
+                <div class="screen-preview chat-preview">
+                  <span class="screen-notch"></span>
+                  <div class="bubble left"></div>
+                  <div class="bubble right"></div>
+                  <div class="bubble left short"></div>
+                </div>
+                <div>
+                  <span class="screen-number">03</span>
+                  <h3>Чаты</h3>
+                  <p>Общий чат, группы и личные диалоги с единой историей сообщений.</p>
+                </div>
+              </article>
+
+              <article class="screen-card">
+                <div class="screen-preview schedule-preview">
+                  <span class="screen-notch"></span>
+                  <div class="schedule-mini"></div>
+                  <div class="schedule-mini active"></div>
+                  <div class="schedule-mini"></div>
+                </div>
+                <div>
+                  <span class="screen-number">04</span>
+                  <h3>Расписание</h3>
+                  <p>Занятия, тренер, зал и запись пользователя на тренировку.</p>
+                </div>
+              </article>
+
+              <article class="screen-card">
+                <div class="screen-preview admin-preview">
+                  <span class="screen-notch"></span>
+                  <div class="preview-row"><span></span><span></span><span></span></div>
+                  <div class="preview-line wide"></div>
+                  <div class="preview-line"></div>
+                </div>
+                <div>
+                  <span class="screen-number">05</span>
+                  <h3>Админ-панель</h3>
+                  <p>Коды, пользователи, группы и расписание для владельца клуба.</p>
+                </div>
+              </article>
+
+              <article class="screen-card">
+                <div class="screen-preview profile-preview">
+                  <span class="screen-notch"></span>
+                  <div class="profile-dot"></div>
+                  <div class="preview-line wide"></div>
+                  <div class="preview-card small"></div>
+                </div>
+                <div>
+                  <span class="screen-number">06</span>
+                  <h3>Профиль</h3>
+                  <p>Роль, цель, локальная база прототипа и настройки доступа.</p>
+                </div>
+              </article>
+            </div>
+
+            <div class="design-system-panel">
+              <div>
+                <p class="eyebrow">визуальная система</p>
+                <h3>Тёмная премиальная тема с фитнес-акцентами</h3>
+                <p>
+                  Основные цвета: глубокий зелёный фон, неоновые зелёные и синие
+                  акценты, мягкие карточки, крупные заголовки и округлые формы.
+                </p>
+              </div>
+              <div class="swatch-row" aria-label="Цвета дизайн-системы">
+                <span style="--swatch: #07130f"></span>
+                <span style="--swatch: #122720"></span>
+                <span style="--swatch: #34e89e"></span>
+                <span style="--swatch: #5cb8ff"></span>
+                <span style="--swatch: #f3fff9"></span>
+              </div>
+            </div>
           </section>
 
           <section class="view" id="profile" data-view-panel>
