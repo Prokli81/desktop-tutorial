@@ -11,6 +11,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="MyFitClub" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <title>MyFitClub</title>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
@@ -591,6 +593,83 @@
               </p>
             </div>
 
+            <div class="panel" id="app-security-panel">
+              <div class="panel-heading">
+                <h3>Защита приложения</h3>
+                <span class="badge badge-blue" id="app-security-badge">бесплатно</span>
+              </div>
+              <p id="app-security-text">
+                Установите MyFitClub на телефон и задайте PIN-код. Всё бесплатно: без SMS,
+                без магазина приложений, без платных тарифов.
+              </p>
+              <form class="admin-form" id="setup-pin-form">
+                <input
+                  id="setup-pin"
+                  type="password"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="6"
+                  placeholder="Новый PIN (4–6 цифр)"
+                  autocomplete="off"
+                  required
+                />
+                <input
+                  id="setup-pin-confirm"
+                  type="password"
+                  inputmode="numeric"
+                  pattern="[0-9]*"
+                  maxlength="6"
+                  placeholder="Повторите PIN"
+                  autocomplete="off"
+                  required
+                />
+                <button class="secondary-button" type="submit">Включить защиту PIN</button>
+              </form>
+              <p class="form-error" id="pin-setup-error" role="alert"></p>
+              <p class="form-success" id="pin-setup-success" role="status"></p>
+              <div class="hidden" id="app-security-enabled">
+                <p class="hint">
+                  PIN включён. Блокировка при сворачивании приложения и через 5 минут бездействия.
+                </p>
+                <form class="admin-form" id="change-pin-form">
+                  <input
+                    id="pin-current"
+                    type="password"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    maxlength="6"
+                    placeholder="Текущий PIN"
+                    autocomplete="off"
+                    required
+                  />
+                  <input
+                    id="pin-new"
+                    type="password"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    maxlength="6"
+                    placeholder="Новый PIN"
+                    autocomplete="off"
+                    required
+                  />
+                  <input
+                    id="pin-confirm"
+                    type="password"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    maxlength="6"
+                    placeholder="Повторите новый PIN"
+                    autocomplete="off"
+                    required
+                  />
+                  <button class="secondary-button" type="submit">Сменить PIN</button>
+                </form>
+                <button class="ghost-button" id="disable-pin" type="button">Отключить PIN</button>
+                <p class="form-error" id="pin-change-error" role="alert"></p>
+                <p class="form-success" id="pin-change-success" role="status"></p>
+              </div>
+            </div>
+
             <div class="panel hidden" id="change-password-panel">
               <div class="panel-heading">
                 <h3>Смена пароля</h3>
@@ -747,7 +826,32 @@
     <script src="data-layer.js" defer></script>
     <script src="data-store.js" defer></script>
     <script src="pwa-install.js" defer></script>
+    <script src="app-lock.js" defer></script>
     <script src="app.js" defer></script>
+
+    <div class="app-lock hidden" id="app-lock" role="dialog" aria-modal="true" aria-label="Разблокировка MyFitClub">
+      <div class="app-lock-card">
+        <div class="brand-mark app-lock-logo" aria-hidden="true">M</div>
+        <p class="eyebrow">защищённый режим</p>
+        <h2>MyFitClub</h2>
+        <p id="app-lock-hint">Введите PIN-код для входа в приложение</p>
+        <input
+          id="app-lock-pin"
+          class="app-lock-input"
+          type="password"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          maxlength="6"
+          placeholder="PIN"
+          autocomplete="off"
+          aria-label="PIN-код"
+        />
+        <p class="form-error" id="app-lock-error" role="alert"></p>
+        <button class="primary-button" id="app-lock-submit" type="button">Разблокировать</button>
+        <button class="link-button" id="app-lock-logout" type="button">Выйти из аккаунта</button>
+      </div>
+    </div>
+
     <div class="install-banner hidden" id="install-banner" role="region" aria-label="Установка приложения">
       <button class="install-banner-close" id="close-install" type="button" aria-label="Закрыть">×</button>
       <div class="install-banner-copy">

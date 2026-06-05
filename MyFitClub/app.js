@@ -104,6 +104,28 @@ const elements = {
   newPassword: document.querySelector("#new-password"),
   changePasswordError: document.querySelector("#change-password-error"),
   changePasswordSuccess: document.querySelector("#change-password-success"),
+  appLock: document.querySelector("#app-lock"),
+  appLockPin: document.querySelector("#app-lock-pin"),
+  appLockError: document.querySelector("#app-lock-error"),
+  appLockHint: document.querySelector("#app-lock-hint"),
+  appLockSubmit: document.querySelector("#app-lock-submit"),
+  appLockLogout: document.querySelector("#app-lock-logout"),
+  appSecurityPanel: document.querySelector("#app-security-panel"),
+  appSecurityBadge: document.querySelector("#app-security-badge"),
+  appSecurityText: document.querySelector("#app-security-text"),
+  setupPinForm: document.querySelector("#setup-pin-form"),
+  setupPin: document.querySelector("#setup-pin"),
+  setupPinConfirm: document.querySelector("#setup-pin-confirm"),
+  pinSetupError: document.querySelector("#pin-setup-error"),
+  pinSetupSuccess: document.querySelector("#pin-setup-success"),
+  appSecurityEnabled: document.querySelector("#app-security-enabled"),
+  changePinForm: document.querySelector("#change-pin-form"),
+  pinCurrent: document.querySelector("#pin-current"),
+  pinNew: document.querySelector("#pin-new"),
+  pinConfirm: document.querySelector("#pin-confirm"),
+  disablePinButton: document.querySelector("#disable-pin"),
+  pinChangeError: document.querySelector("#pin-change-error"),
+  pinChangeSuccess: document.querySelector("#pin-change-success"),
   firebaseStageBadge: document.querySelector("#firebase-stage-badge"),
   firebaseStageText: document.querySelector("#firebase-stage-text"),
   dbCodesCount: document.querySelector("#db-codes-count"),
@@ -251,11 +273,11 @@ function renderNotificationPermission() {
 
   if (Notification.permission === "granted") {
     const pushReady = window.MyFitClubMessaging?.canUseMessaging?.();
-    elements.notificationPermissionBadge.textContent = pushReady ? "FCM" : "вкл";
+    elements.notificationPermissionBadge.textContent = pushReady ? "FCM+" : "вкл";
     elements.notificationPermissionText.textContent = pushReady
-      ? "Push Firebase подключён. Новые сообщения приходят даже при закрытом приложении (после деплоя Cloud Function)."
-      : "Уведомления браузера включены. Добавьте vapidKey для полноценного push.";
-    elements.enableNotifications.textContent = pushReady ? "Push включён" : "Уведомления включены";
+      ? "Уведомления включены (бесплатно). FCM+ — опционально, требует платный тариф Firebase Blaze."
+      : "Уведомления включены (бесплатно). Сообщения приходят, когда приложение открыто или свёрнуто на телефоне.";
+    elements.enableNotifications.textContent = "Уведомления включены";
     elements.enableNotifications.disabled = true;
     return;
   }
@@ -268,15 +290,9 @@ function renderNotificationPermission() {
     return;
   }
 
-  if (window.MyFitClubMessaging?.canUseMessaging?.()) {
-    elements.notificationPermissionBadge.textContent = "push";
-    elements.notificationPermissionText.textContent =
-      "Можно включить настоящие push-уведомления Firebase (FCM) для телефона.";
-  } else {
-    elements.notificationPermissionBadge.textContent = "выкл";
-    elements.notificationPermissionText.textContent =
-      "Включите уведомления браузера. Для push на телефон добавьте vapidKey в firebase-config.js (см. docs/fcm-setup.md).";
-  }
+  elements.notificationPermissionBadge.textContent = "выкл";
+  elements.notificationPermissionText.textContent =
+    "Включите уведомления — это бесплатно. Работают на телефоне, когда MyFitClub установлен или открыт в браузере.";
   elements.enableNotifications.disabled = false;
   elements.enableNotifications.textContent = "Включить уведомления";
 }
@@ -798,6 +814,105 @@ function onCloudDataRefresh() {
   renderSyncStatus();
 }
 
+function getAppLock() {
+  return window.MyFitClubAppLock;
+}
+
+function showAppLockScreen() {
+  if (!elements.appLock || !getAppLock()?.isEnabled()) {
+    return;
+  }
+
+  elements.appLockPin.value = "";
+  elements.appLockError.textContent = "";
+  elements.appLock.classList.remove("hidden");
+  elements.appLockPin.focus();
+}
+
+function hideAppLockScreen() {
+  elements.appLock?.classList.add("hidden");
+  elements.appLockPin.value = "";
+  elements.appLockError.textContent = "";
+  getAppLock()?.scheduleInactivityLock();
+}
+
+function renderAppSecurityPanel() {
+  const lock = getAppLock();
+
+  if (!elements.appSecurityPanel || !lock) {
+    return;
+  }
+
+  const enabled = lock.isEnabled();
+  const standalone = lock.isStandalone();
+
+  elements.setupPinForm?.classList.toggle("hidden", enabled);
+  elements.appSecurityEnabled?.classList.toggle("hidden", !enabled);
+  elements.pinSetupError.textContent = "";
+  elements.pinSetupSuccess.textContent = "";
+  elements.pinChangeError.textContent = "";
+  elements.pinChangeSuccess.textContent = "";
+
+  if (enabled) {
+    elements.appSecurityBadge.textContent = "PIN вкл";
+    elements.appSecurityText.textContent =
+      "Приложение защищено PIN-кодом. Блокировка при сворачивании и через 5 минут бездействия.";
+    return;
+  }
+
+  if (standalone) {
+    elements.appSecurityBadge.textContent = "установлено";
+    elements.appSecurityText.textContent =
+      "MyFitClub на главном экране. Задайте PIN — бесплатно, хранится только на этом телефоне.";
+    return;
+  }
+
+  elements.appSecurityBadge.textContent = "бесплатно";
+  elements.appSecurityText.textContent =
+    "Установите MyFitClub на телефон (Android: «Установить», iPhone: Safari → «На экран Домой»), затем задайте PIN.";
+}
+
+let appSecurityBound = false;
+
+function startAppSecurity() {
+  const lock = getAppLock();
+
+  if (!lock || !state.currentUser) {
+    return;
+  }
+
+  renderAppSecurityPanel();
+  lock.bindInactivityTracking();
+
+  if (!appSecurityBound) {
+    appSecurityBound = true;
+
+    document.addEventListener("myfitclub:lock", showAppLockScreen);
+    document.addEventListener("myfitclub:unlock", hideAppLockScreen);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden" && state.currentUser && lock.isEnabled()) {
+        lock.lock();
+      }
+    });
+
+    window.addEventListener("pageshow", (event) => {
+      if (event.persisted && state.currentUser && lock.isEnabled()) {
+        lock.lock();
+      }
+    });
+  }
+
+  if (lock.isEnabled()) {
+    lock.lock();
+  }
+}
+
+function stopAppSecurity() {
+  getAppLock()?.clearInactivityTimer();
+  hideAppLockScreen();
+}
+
 async function enterApp(user) {
   state.currentUser = user;
   elements.onboardingScreen.classList.add("hidden");
@@ -846,9 +961,12 @@ async function enterApp(user) {
     };
     notifyIncomingMessage(message, chat);
   });
+
+  startAppSecurity();
 }
 
 async function resetDemo() {
+  stopAppSecurity();
   stopPresenceHeartbeat();
   window.MyFitClubData.destroy();
 
@@ -1392,6 +1510,138 @@ elements.authTabs.forEach((tab) => {
   tab.addEventListener("click", () => setAuthMode(tab.dataset.authMode));
 });
 
+elements.setupPinForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  elements.pinSetupError.textContent = "";
+  elements.pinSetupSuccess.textContent = "";
+
+  const lock = getAppLock();
+
+  if (!lock) {
+    return;
+  }
+
+  const pin = elements.setupPin.value.trim();
+  const confirmPin = elements.setupPinConfirm.value.trim();
+  const submitButton = elements.setupPinForm.querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+
+  try {
+    const result = await lock.setupPin(pin, confirmPin);
+
+    if (!result.ok) {
+      elements.pinSetupError.textContent = result.message;
+      return;
+    }
+
+    elements.setupPin.value = "";
+    elements.setupPinConfirm.value = "";
+    elements.pinSetupSuccess.textContent = "PIN включён. Приложение будет блокироваться при сворачивании.";
+    renderAppSecurityPanel();
+    lock.scheduleInactivityLock();
+  } finally {
+    submitButton.disabled = false;
+  }
+});
+
+elements.changePinForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  elements.pinChangeError.textContent = "";
+  elements.pinChangeSuccess.textContent = "";
+
+  const lock = getAppLock();
+
+  if (!lock) {
+    return;
+  }
+
+  const currentPin = elements.pinCurrent.value.trim();
+  const newPin = elements.pinNew.value.trim();
+  const confirmPin = elements.pinConfirm.value.trim();
+  const submitButton = elements.changePinForm.querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+
+  try {
+    const result = await lock.changePin(currentPin, newPin, confirmPin);
+
+    if (!result.ok) {
+      elements.pinChangeError.textContent = result.message;
+      return;
+    }
+
+    elements.pinCurrent.value = "";
+    elements.pinNew.value = "";
+    elements.pinConfirm.value = "";
+    elements.pinChangeSuccess.textContent = "PIN обновлён.";
+  } finally {
+    submitButton.disabled = false;
+  }
+});
+
+elements.disablePinButton?.addEventListener("click", async () => {
+  elements.pinChangeError.textContent = "";
+  elements.pinChangeSuccess.textContent = "";
+
+  const lock = getAppLock();
+
+  if (!lock) {
+    return;
+  }
+
+  const currentPin = elements.pinCurrent.value.trim();
+
+  if (!currentPin) {
+    elements.pinChangeError.textContent =
+      "Введите текущий PIN в первое поле, затем нажмите «Отключить PIN».";
+    return;
+  }
+
+  const result = await lock.disablePin(currentPin);
+
+  if (!result.ok) {
+    elements.pinChangeError.textContent = result.message;
+    return;
+  }
+
+  elements.pinChangeSuccess.textContent = "PIN отключён.";
+  renderAppSecurityPanel();
+});
+
+async function submitAppLockUnlock() {
+  const lock = getAppLock();
+
+  if (!lock) {
+    return;
+  }
+
+  elements.appLockError.textContent = "";
+  const pin = elements.appLockPin.value.trim();
+  const result = await lock.unlock(pin);
+
+  if (!result.ok) {
+    elements.appLockError.textContent = result.message;
+    elements.appLockPin.value = "";
+    elements.appLockPin.focus();
+    return;
+  }
+
+  hideAppLockScreen();
+}
+
+elements.appLockSubmit?.addEventListener("click", submitAppLockUnlock);
+
+elements.appLockPin?.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    submitAppLockUnlock();
+  }
+});
+
+elements.appLockLogout?.addEventListener("click", () => {
+  stopAppSecurity();
+  resetDemo();
+});
+
 elements.changePasswordForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   elements.changePasswordError.textContent = "";
@@ -1619,11 +1869,9 @@ elements.enableNotifications?.addEventListener("click", async () => {
   renderNotificationPermission();
 
   if (permission === "granted") {
-    const pushResult = await registerPushNotifications();
+    await registerPushNotifications();
     new Notification("MyFitClub", {
-      body: pushResult.ok
-        ? "Push-уведомления MyFitClub включены."
-        : "Уведомления браузера включены. Для FCM добавьте vapidKey.",
+      body: "Уведомления включены (бесплатно). Новые сообщения будут приходить на этот телефон.",
       icon: "assets/icon.svg",
     });
     renderNotificationPermission();

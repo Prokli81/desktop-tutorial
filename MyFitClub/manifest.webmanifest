@@ -1,10 +1,12 @@
 {
+  "id": "myfitclub-pwa",
   "name": "MyFitClub",
   "short_name": "MyFitClub",
-  "description": "Закрытое приложение фитнес-клуба для общения, расписания и клубного сообщества.",
+  "description": "Закрытое защищённое приложение фитнес-клуба для общения, расписания и клубного сообщества.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#07130f",
   "theme_color": "#07130f",
