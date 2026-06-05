@@ -801,7 +801,7 @@ function renderAuthBackendInfo() {
       elements.firebaseStageText.textContent =
         "Облачный вход активен. Войдите в аккаунт, чтобы подключить общую базу Firestore.";
     }
-    setAuthMode(state.authMode);
+    setAuthMode(state.authMode || "login");
   if (document.querySelector("#data-backend-badge")) {
       document.querySelector("#data-backend-badge").textContent =
         window.MyFitClubData?.isCloudData?.() ? "Firestore" : "localStorage";
@@ -1237,6 +1237,30 @@ function setAuthMode(mode) {
 
   elements.authError.textContent = "";
   elements.authSuccess.textContent = "";
+  renderAuthEntryHint();
+}
+
+function renderAuthEntryHint() {
+  const note = document.querySelector(".access-note");
+
+  if (!note) {
+    return;
+  }
+
+  if (state.authMode === "signup") {
+    note.innerHTML =
+      "<strong>Регистрация:</strong> нужен пригласительный код (CLIENT2026 и др.), email и пароль от 6 символов.";
+    return;
+  }
+
+  if (isFirebaseAuth()) {
+    note.innerHTML =
+      "<strong>Вход:</strong> email и пароль из регистрации. На компьютере и телефоне — один и тот же аккаунт.";
+    return;
+  }
+
+  note.innerHTML =
+    "<strong>Сейчас локальный режим.</strong> Ваш облачный аккаунт здесь не войдёт. Нужна зелёная строка «Облачный режим Firebase подключён» выше. Обновите приложение (Ctrl+F5) или откройте сайт в браузере.";
 }
 
 function getChatsByType(type) {
@@ -2220,11 +2244,12 @@ elements.resetDemo.addEventListener("click", resetDemo);
 async function bootstrap() {
   initOnboarding();
   state.bookedScheduleIds = new Set(loadBookings());
-  setAuthMode("signup");
+  setAuthMode("login");
   elements.resetDemo.classList.add("hidden");
 
   const cloudAvailable = await prepareCloudMode();
   renderAuthBackendInfo();
+  renderAuthEntryHint();
   renderSyncStatus();
 
   if (cloudAvailable) {
