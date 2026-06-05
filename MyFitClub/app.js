@@ -1,5 +1,7 @@
 const SESSION_STORAGE_KEY = "myfitclub:user";
 const ONBOARDING_STORAGE_KEY = "myfitclub:onboarding-complete";
+const LAST_READ_STORAGE_KEY = "myfitclub:last-read";
+const PRESENCE_INTERVAL_MS = 60_000;
 
 const inviteCodes = {
   CLIENT2026: {
@@ -29,6 +31,9 @@ const state = {
   bookedScheduleIds: new Set(),
   activeChatId: "club-main",
   previousView: "club-chat",
+  activeView: "dashboard",
+  lastMessageSnapshot: {},
+  presenceTimer: null,
 };
 
 const elements = {
@@ -47,6 +52,13 @@ const elements = {
   memberName: document.querySelector("#member-name"),
   memberEmail: document.querySelector("#member-email"),
   memberPassword: document.querySelector("#member-password"),
+  syncStatus: document.querySelector("#sync-status"),
+  unreadCount: document.querySelector("#unread-count"),
+  groupCount: document.querySelector("#group-count"),
+  onlineCount: document.querySelector("#online-count"),
+  enableNotifications: document.querySelector("#enable-notifications"),
+  notificationPermissionBadge: document.querySelector("#notification-permission-badge"),
+  notificationPermissionText: document.querySelector("#notification-permission-text"),
   resetDemo: document.querySelector("#reset-demo"),
   roleLabel: document.querySelector("#role-label"),
   welcomeTitle: document.querySelector("#welcome-title"),
@@ -102,6 +114,245 @@ const elements = {
   tabs: document.querySelectorAll(".tab"),
   views: document.querySelectorAll("[data-view-panel]"),
 };
+
+
+function getLastReadMap() {
+  return loadJson(LAST_READ_STORAGE_KEY, {});
+}
+
+function markChatRead(chatId) {
+  const map = getLastReadMap();
+  map[chatId] = new Date().toISOString();
+  localStorage.setItem(LAST_READ_STORAGE_KEY, JSON.stringify(map));
+  renderUnreadIndicators();
+}
+
+function getUnreadCountForChat(chatId) {
+  if (!state.currentUser) {
+    return 0;
+  }
+
+  const lastReadAt = getLastReadMap()[chatId] || "1970-01-01T00:00:00.000Z";
+  return getMessagesByChat(chatId).filter(
+    (message) =>
+      message.userId !== state.currentUser.id &&
+      new Date(message.createdAt || 0) > new Date(lastReadAt),
+  ).length;
+}
+
+function getTotalUnreadCount() {
+  return MyFitClubData.list("chats").reduce(
+    (total, chat) => total + getUnreadCountForChat(chat.id),
+    0,
+  );
+}
+
+function getActiveViewName() {
+  const activeView = [...elements.views].find((view) => view.classList.contains("active"));
+  return activeView?.id || state.activeView || "dashboard";
+}
+
+function renderUnreadIndicators() {
+  const totalUnread = getTotalUnreadCount();
+
+  if (elements.unreadCount) {
+    elements.unreadCount.textContent = String(totalUnread);
+  }
+
+  elements.tabs.forEach((tab) => {
+    const existing = tab.querySelector(".tab-unread");
+    if (existing) {
+      existing.remove();
+    }
+
+    if (tab.dataset.view !== "club-chat" || totalUnread <= 0) {
+      return;
+    }
+
+    const badge = document.createElement("span");
+    badge.className = "tab-unread";
+    badge.textContent = String(totalUnread);
+    tab.append(badge);
+  });
+}
+
+function renderOnlineCount() {
+  if (!elements.onlineCount) {
+    return;
+  }
+
+  if (!MyFitClubData.isCloudData()) {
+    elements.onlineCount.textContent = state.currentUser ? "1 онлайн" : "онлайн";
+    return;
+  }
+
+  const cutoff = Date.now() - 5 * 60 * 1000;
+  const onlineUsers = MyFitClubData.list("users").filter((user) => {
+    const lastSeen = new Date(user.lastSeenAt || 0).getTime();
+    return lastSeen >= cutoff;
+  }).length;
+
+  elements.onlineCount.textContent = onlineUsers > 0 ? `${onlineUsers} онлайн` : "онлайн";
+}
+
+function renderSyncStatus() {
+  if (!elements.syncStatus) {
+    return;
+  }
+
+  if (MyFitClubData.isCloudData()) {
+    elements.syncStatus.textContent = "облако";
+    elements.syncStatus.classList.remove("hidden", "local");
+    return;
+  }
+
+  if (isFirebaseAuth()) {
+    elements.syncStatus.textContent = "вход облако";
+    elements.syncStatus.classList.remove("hidden");
+    elements.syncStatus.classList.add("local");
+    return;
+  }
+
+  elements.syncStatus.textContent = "локально";
+  elements.syncStatus.classList.remove("hidden");
+  elements.syncStatus.classList.add("local");
+}
+
+function renderNotificationPermission() {
+  if (!elements.notificationPermissionBadge) {
+    return;
+  }
+
+  if (!("Notification" in window)) {
+    elements.notificationPermissionBadge.textContent = "нет";
+    elements.notificationPermissionText.textContent =
+      "Этот браузер не поддерживает push-уведомления.";
+    elements.enableNotifications.disabled = true;
+    return;
+  }
+
+  if (Notification.permission === "granted") {
+    elements.notificationPermissionBadge.textContent = "вкл";
+    elements.notificationPermissionText.textContent =
+      "Уведомления включены. Новые сообщения в чатах будут приходить, когда приложение свёрнуто.";
+    elements.enableNotifications.textContent = "Уведомления включены";
+    elements.enableNotifications.disabled = true;
+    return;
+  }
+
+  if (Notification.permission === "denied") {
+    elements.notificationPermissionBadge.textContent = "блок";
+    elements.notificationPermissionText.textContent =
+      "Браузер заблокировал уведомления. Разрешите их в настройках сайта.";
+    elements.enableNotifications.disabled = true;
+    return;
+  }
+
+  elements.notificationPermissionBadge.textContent = "выкл";
+  elements.notificationPermissionText.textContent =
+    "Включите уведомления, чтобы не пропускать новые сообщения в чатах клуба.";
+  elements.enableNotifications.disabled = false;
+  elements.enableNotifications.textContent = "Включить уведомления";
+}
+
+function shouldNotifyForChat(chatId) {
+  const activeView = getActiveViewName();
+  if (activeView === "chat-detail" && state.activeChatId === chatId) {
+    return false;
+  }
+  if (activeView === "club-chat" && chatId === "club-main") {
+    return false;
+  }
+  return true;
+}
+
+function notifyIncomingMessage(message, chat) {
+  if (!("Notification" in window) || Notification.permission !== "granted") {
+    return;
+  }
+
+  const title = chat?.title || "MyFitClub";
+  const body = `${message.author}: ${message.text}`;
+  const notification = new Notification(title, {
+    body,
+    icon: "assets/icon.svg",
+    tag: `chat-${message.chatId}`,
+  });
+
+  notification.onclick = () => {
+    window.focus();
+    if (!chat) {
+      return;
+    }
+    if (chat.id === "club-main") {
+      activateView("club-chat");
+      renderClubMessages();
+      return;
+    }
+    openChat(chat.id, chat.type === "direct" ? "direct" : "groups");
+  };
+}
+
+function detectIncomingMessages() {
+  if (!state.currentUser) {
+    return;
+  }
+
+  MyFitClubData.list("chats").forEach((chat) => {
+    const messages = getMessagesByChat(chat.id);
+    const latestMessage = messages.at(-1);
+    const previousId = state.lastMessageSnapshot[chat.id];
+
+    if (!latestMessage || latestMessage.id === previousId) {
+      state.lastMessageSnapshot[chat.id] = latestMessage?.id;
+      return;
+    }
+
+    if (
+      latestMessage.userId !== state.currentUser.id &&
+      shouldNotifyForChat(chat.id)
+    ) {
+      notifyIncomingMessage(latestMessage, chat);
+    }
+
+    state.lastMessageSnapshot[chat.id] = latestMessage.id;
+  });
+
+  renderUnreadIndicators();
+}
+
+async function touchPresence() {
+  if (!state.currentUser?.id || !isFirebaseAuth()) {
+    return;
+  }
+
+  try {
+    await window.MyFitClubFirebase.updateLastSeen(state.currentUser.id);
+    const users = loadUsers().map((user) =>
+      user.id === state.currentUser.id
+        ? { ...user, lastSeenAt: new Date().toISOString() }
+        : user,
+    );
+    saveUsers(users);
+    renderOnlineCount();
+  } catch (error) {
+    console.warn("Presence update failed", error);
+  }
+}
+
+function startPresenceHeartbeat() {
+  stopPresenceHeartbeat();
+  touchPresence();
+  state.presenceTimer = window.setInterval(touchPresence, PRESENCE_INTERVAL_MS);
+}
+
+function stopPresenceHeartbeat() {
+  if (state.presenceTimer) {
+    window.clearInterval(state.presenceTimer);
+    state.presenceTimer = null;
+  }
+}
+
 
 function normalizeCode(code) {
   return code.trim().toUpperCase();
@@ -369,6 +620,10 @@ function onCloudDataRefresh() {
   if (state.activeChatId) {
     renderMessageList(elements.chatDetailList, state.activeChatId);
   }
+
+  detectIncomingMessages();
+  renderOnlineCount();
+  renderSyncStatus();
 }
 
 async function enterApp(user) {
@@ -394,11 +649,16 @@ async function enterApp(user) {
   }
 
   renderAuthBackendInfo();
+  renderSyncStatus();
+  startPresenceHeartbeat();
   renderClubMessages();
   refreshAppData();
+  detectIncomingMessages();
+  renderNotificationPermission();
 }
 
 async function resetDemo() {
+  stopPresenceHeartbeat();
   window.MyFitClubData.destroy();
 
   if (isFirebaseAuth()) {
@@ -531,6 +791,9 @@ function renderMessageList(container, chatId) {
 
 function renderClubMessages() {
   renderMessageList(elements.clubChatList, "club-main");
+  if (getActiveViewName() === "club-chat") {
+    markChatRead("club-main");
+  }
 }
 
 function openChat(chatId, previousView = "groups") {
@@ -546,6 +809,7 @@ function openChat(chatId, previousView = "groups") {
   elements.chatDetailTitle.textContent = chat.title;
   elements.chatDetailDescription.textContent = chat.description;
   renderMessageList(elements.chatDetailList, chatId);
+  markChatRead(chatId);
   activateView("chat-detail");
 }
 
@@ -677,6 +941,10 @@ function renderAdminPanel() {
 }
 
 function refreshAppData() {
+  if (elements.groupCount) {
+    const groupTotal = getChatsByType("group").length;
+    elements.groupCount.textContent = `${groupTotal} тем`;
+  }
   renderDirectDialogs();
   renderGroups();
   renderSchedule();
@@ -684,9 +952,13 @@ function refreshAppData() {
   updateBookingCount();
   renderDatabaseStats();
   renderAdminPanel();
+  renderUnreadIndicators();
+  renderOnlineCount();
+  renderSyncStatus();
 }
 
 function activateView(viewName) {
+  state.activeView = viewName;
   elements.tabs.forEach((tab) => {
     tab.classList.toggle("active", tab.dataset.view === viewName);
   });
@@ -694,6 +966,10 @@ function activateView(viewName) {
   elements.views.forEach((view) => {
     view.classList.toggle("active", view.id === viewName);
   });
+
+  if (viewName === "club-chat") {
+    markChatRead("club-main");
+  }
 }
 
 elements.authForm.addEventListener("submit", async (event) => {
@@ -976,6 +1252,9 @@ elements.adminScheduleForm.addEventListener("submit", (event) => {
   elements.adminEventDate.value = "";
   renderSchedule();
   renderAdminPanel();
+  renderUnreadIndicators();
+  renderOnlineCount();
+  renderSyncStatus();
 });
 
 
@@ -994,11 +1273,28 @@ elements.onboardingDots.querySelectorAll(".dot").forEach((dot) => {
   dot.addEventListener("click", () => goToOnboardingSlide(Number(dot.dataset.slideTo)));
 });
 
+elements.enableNotifications?.addEventListener("click", async () => {
+  if (!("Notification" in window)) {
+    return;
+  }
+
+  const permission = await Notification.requestPermission();
+  renderNotificationPermission();
+
+  if (permission === "granted") {
+    new Notification("MyFitClub", {
+      body: "Уведомления включены. Новые сообщения в чатах будут приходить сюда.",
+      icon: "assets/icon.svg",
+    });
+  }
+});
+
 elements.resetDemo.addEventListener("click", resetDemo);
 
 async function bootstrap() {
   initOnboarding();
   renderAuthBackendInfo();
+  renderSyncStatus();
   state.bookedScheduleIds = new Set(loadBookings());
   setAuthMode("signup");
   refreshAppData();

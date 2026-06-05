@@ -118,6 +118,16 @@
     return messages[error?.code] || error?.message || "Не удалось выполнить вход.";
   }
 
+  async function updateLastSeen(uid) {
+    const { db } = await ensureReady();
+    await db.collection("users").doc(uid).set(
+      {
+        lastSeenAt: new Date().toISOString(),
+      },
+      { merge: true },
+    );
+  }
+
   window.MyFitClubFirebase = {
     isEnabled,
     init: ensureReady,
@@ -126,6 +136,7 @@
     signOut,
     saveUserProfile,
     getUserProfile,
+    updateLastSeen,
     waitForAuthState,
     mapAuthError,
   };

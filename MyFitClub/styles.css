@@ -1296,3 +1296,79 @@ button {
     padding: 28px;
   }
 }
+
+.sync-status {
+  align-self: center;
+  border: 1px solid rgba(88, 255, 173, 0.28);
+  border-radius: 999px;
+  color: #8dffc8;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  padding: 6px 12px;
+  text-transform: lowercase;
+}
+
+.sync-status.local {
+  border-color: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.install-banner {
+  align-items: center;
+  background: linear-gradient(180deg, rgba(8, 28, 22, 0.98), rgba(4, 14, 11, 0.98));
+  border-top: 1px solid rgba(88, 255, 173, 0.18);
+  bottom: 0;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  left: 0;
+  padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  position: fixed;
+  right: 0;
+  z-index: 30;
+}
+
+.install-banner p {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.92rem;
+  margin: 6px 0 0;
+}
+
+.install-banner-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.notification-permission-panel {
+  margin-bottom: 16px;
+}
+
+.tab-unread {
+  background: #58ffad;
+  border-radius: 999px;
+  color: #04110d;
+  display: inline-flex;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-left: 6px;
+  min-width: 18px;
+  padding: 2px 6px;
+  vertical-align: middle;
+}
+
+@media (max-width: 720px) {
+  .install-banner {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .install-banner-actions {
+    width: 100%;
+  }
+
+  .install-banner-actions .primary-button,
+  .install-banner-actions .ghost-button {
+    flex: 1;
+  }
+}

@@ -27,6 +27,7 @@
             <h1>MyFitClub</h1>
           </div>
         </div>
+        <span class="sync-status hidden" id="sync-status">облако</span>
         <button class="ghost-button" id="reset-demo" type="button">Выйти</button>
       </header>
 
@@ -242,11 +243,11 @@
               </article>
               <article class="metric-card">
                 <span>Новые сообщения</span>
-                <strong>5</strong>
+                <strong id="unread-count">0</strong>
               </article>
               <article class="metric-card">
                 <span>Группы</span>
-                <strong>5 тем</strong>
+                <strong id="group-count">5 тем</strong>
               </article>
               <article class="metric-card">
                 <span>Мои записи</span>
@@ -320,7 +321,7 @@
                 <p class="eyebrow">общий чат</p>
                 <h2>Клубная лента</h2>
               </div>
-              <span class="online-dot">42 онлайн</span>
+              <span class="online-dot" id="online-count">онлайн</span>
             </div>
             <div class="chat-card" id="club-chat-list"></div>
             <form class="message-form" id="club-message-form">
@@ -382,6 +383,18 @@
                 <p class="eyebrow">push-уведомления</p>
                 <h2>Что важно не пропустить</h2>
               </div>
+            </div>
+                        <div class="panel notification-permission-panel">
+              <div class="panel-heading">
+                <h3>Уведомления браузера</h3>
+                <span class="badge badge-blue" id="notification-permission-badge">выкл</span>
+              </div>
+              <p id="notification-permission-text">
+                Включите уведомления, чтобы не пропускать новые сообщения в чатах клуба.
+              </p>
+              <button class="secondary-button" id="enable-notifications" type="button">
+                Включить уведомления
+              </button>
             </div>
             <div class="notification-list" id="notification-list"></div>
           </section>
@@ -659,6 +672,17 @@
     <script src="firebase-data.js" defer></script>
     <script src="data-layer.js" defer></script>
     <script src="data-store.js" defer></script>
+    <script src="pwa-install.js" defer></script>
     <script src="app.js" defer></script>
+    <div class="install-banner hidden" id="install-banner" role="region" aria-label="Установка приложения">
+      <div>
+        <strong>Установить MyFitClub</strong>
+        <p id="install-hint">Откройте клуб как приложение на главном экране телефона.</p>
+      </div>
+      <div class="install-banner-actions">
+        <button class="primary-button" id="install-app" type="button">Установить</button>
+        <button class="ghost-button" id="dismiss-install" type="button">Позже</button>
+      </div>
+    </div>
   </body>
 </html>
