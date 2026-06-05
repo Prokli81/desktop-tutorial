@@ -591,6 +591,38 @@
               </p>
             </div>
 
+            <div class="panel hidden" id="change-password-panel">
+              <div class="panel-heading">
+                <h3>Смена пароля</h3>
+                <span class="badge badge-blue">email</span>
+              </div>
+              <p>
+                Задайте новый пароль здесь. Если забыли старый — на экране входа
+                нажмите «Забыли пароль?» (письмо на email).
+              </p>
+              <form class="admin-form" id="change-password-form">
+                <input
+                  id="current-password"
+                  type="password"
+                  placeholder="Текущий пароль"
+                  autocomplete="current-password"
+                  minlength="6"
+                  required
+                />
+                <input
+                  id="new-password"
+                  type="password"
+                  placeholder="Новый пароль (минимум 6 символов)"
+                  autocomplete="new-password"
+                  minlength="6"
+                  required
+                />
+                <button class="secondary-button" type="submit">Сохранить пароль</button>
+              </form>
+              <p class="form-error" id="change-password-error" role="alert"></p>
+              <p class="form-success" id="change-password-success" role="status"></p>
+            </div>
+
             <div class="panel database-panel">
               <div class="panel-heading">
                 <h3>Локальная база прототипа</h3>
