@@ -1,10 +1,10 @@
 /**
  * Конфигурация Firebase для MyFitClub (веб).
- * Ключи публичные — защита через правила Firestore и Authentication.
+ * Скопировано из Firebase Console → MyFitClub Web.
  */
 window.MYFITCLUB_FIREBASE_CONFIG = {
   enabled: true,
-  apiKey: "AIzaSyDA_8Nafz1-a3uJPG4dE8PmkyPJXGsE8bM",
+  apiKey: "AIzaSyDA_8Nafz1-a3ujPG4dE8PmkyPJXGsE8bM",
   authDomain: "myfitclub-4d1b8.firebaseapp.com",
   projectId: "myfitclub-4d1b8",
   storageBucket: "myfitclub-4d1b8.firebasestorage.app",

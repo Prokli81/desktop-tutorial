@@ -1,8 +1,8 @@
 /**
- * Конфиг для service worker (FCM). Должен совпадать с firebase-config.js
+ * Конфиг для service worker (FCM). Совпадает с firebase-config.js
  */
 self.FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDA_8Nafz1-a3uJPG4dE8PmkyPJXGsE8bM",
+  apiKey: "AIzaSyDA_8Nafz1-a3ujPG4dE8PmkyPJXGsE8bM",
   authDomain: "myfitclub-4d1b8.firebaseapp.com",
   projectId: "myfitclub-4d1b8",
   storageBucket: "myfitclub-4d1b8.firebasestorage.app",
