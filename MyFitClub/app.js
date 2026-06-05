@@ -132,11 +132,11 @@ function loadJson(key, fallback) {
 }
 
 function saveUsers(users) {
-  MyFitClubStore.replace("users", users);
+  MyFitClubData.replace("users", users);
 }
 
 function loadUsers() {
-  return MyFitClubStore.list("users");
+  return MyFitClubData.list("users");
 }
 
 function toPublicUser(user) {
@@ -177,9 +177,19 @@ function renderAuthBackendInfo() {
     elements.authBackendBadge.textContent = "Firebase";
     elements.authBackendText.textContent =
       "Вход и регистрация работают через Firebase. Один аккаунт открывается на телефоне и компьютере.";
-    elements.firebaseStageBadge.textContent = "включено";
-    elements.firebaseStageText.textContent =
-      "Облачный вход активен. Следующий шаг — перенести чаты и расписание в Firestore (этап 3).";
+    if (window.MyFitClubData?.isCloudData?.()) {
+      elements.firebaseStageBadge.textContent = "Firestore";
+      elements.firebaseStageText.textContent =
+        "Чаты, расписание и записи синхронизируются в облаке. Сообщения видят все участники клуба.";
+    } else {
+      elements.firebaseStageBadge.textContent = "включено";
+      elements.firebaseStageText.textContent =
+        "Облачный вход активен. Войдите в аккаунт, чтобы подключить общую базу Firestore.";
+    }
+    if (document.querySelector("#data-backend-badge")) {
+      document.querySelector("#data-backend-badge").textContent =
+        window.MyFitClubData?.isCloudData?.() ? "Firestore" : "localStorage";
+    }
     return;
   }
 
@@ -213,15 +223,7 @@ function validateSignupInvite(code) {
   return { ok: true, storedInvite };
 }
 
-function consumeInviteCode(code) {
-  MyFitClubStore.update((db) => {
-    db.invitationCodes = db.invitationCodes.map((inviteCode) =>
-      inviteCode.code === code
-        ? { ...inviteCode, usedCount: inviteCode.usedCount + 1 }
-        : inviteCode,
-    );
-  });
-}
+
 
 async function loginWithFirebase(email, password) {
   const authUser = await window.MyFitClubFirebase.signIn(email, password);
@@ -239,7 +241,7 @@ async function loginWithFirebase(email, password) {
   const publicUser = toPublicUser(profile);
   syncUserToLocalStore(publicUser);
   saveSession(publicUser);
-  enterApp(publicUser);
+  await enterApp(publicUser);
   return { ok: true };
 }
 
@@ -266,12 +268,12 @@ async function signupWithFirebase({ name, email, password, code }) {
     createdAt: profile.createdAt,
   });
 
-  consumeInviteCode(code);
+  await MyFitClubData.consumeInviteCode(code);
   const publicUser = toPublicUser(profile);
   syncUserToLocalStore(publicUser);
   elements.authSuccess.textContent = "Аккаунт создан в Firebase. Входим в MyFitClub...";
   saveSession(publicUser);
-  enterApp(publicUser);
+  await enterApp(publicUser);
   return { ok: true };
 }
 
@@ -292,7 +294,7 @@ function getRoleLabel(role) {
 }
 
 function getInviteByCode(code) {
-  return MyFitClubStore.list("invitationCodes").find(
+  return MyFitClubData.list("invitationCodes").find(
     (candidate) => candidate.code === code && candidate.isActive,
   );
 }
@@ -338,7 +340,7 @@ function saveSession(user) {
 }
 
 function loadBookings() {
-  return MyFitClubStore.list("bookings").map((booking) => booking.scheduleId || booking);
+  return MyFitClubData.list("bookings").map((booking) => booking.scheduleId || booking);
 }
 
 function saveBookings() {
@@ -348,14 +350,28 @@ function saveBookings() {
     scheduleId,
     createdAt: new Date().toISOString(),
   }));
-  MyFitClubStore.replace("bookings", bookings);
+  MyFitClubData.replace("bookings", bookings);
 }
 
 function loadSession() {
   return loadJson(SESSION_STORAGE_KEY, null);
 }
 
-function enterApp(user) {
+function onCloudDataRefresh() {
+  if (!state.currentUser) {
+    return;
+  }
+
+  state.bookedScheduleIds = new Set(loadBookings());
+  refreshAppData();
+  renderClubMessages();
+
+  if (state.activeChatId) {
+    renderMessageList(elements.chatDetailList, state.activeChatId);
+  }
+}
+
+async function enterApp(user) {
   state.currentUser = user;
   elements.onboardingScreen.classList.add("hidden");
   elements.inviteScreen.classList.add("hidden");
@@ -369,12 +385,22 @@ function enterApp(user) {
   elements.profileAvatar.textContent = getInitials(user.name);
   elements.adminPanel.classList.toggle("hidden", user.role !== "admin");
 
-  renderClubMessages();
+  if (isFirebaseAuth()) {
+    try {
+      await window.MyFitClubData.init(onCloudDataRefresh);
+    } catch (error) {
+      console.warn("MyFitClub Firestore init failed", error);
+    }
+  }
+
   renderAuthBackendInfo();
+  renderClubMessages();
   refreshAppData();
 }
 
 async function resetDemo() {
+  window.MyFitClubData.destroy();
+
   if (isFirebaseAuth()) {
     try {
       await window.MyFitClubFirebase.signOut();
@@ -456,15 +482,17 @@ function setAuthMode(mode) {
 }
 
 function getChatsByType(type) {
-  return MyFitClubStore.list("chats").filter((chat) => chat.type === type);
+  return MyFitClubData.list("chats").filter((chat) => chat.type === type);
 }
 
 function getChat(chatId) {
-  return MyFitClubStore.list("chats").find((chat) => chat.id === chatId);
+  return MyFitClubData.list("chats").find((chat) => chat.id === chatId);
 }
 
 function getMessagesByChat(chatId) {
-  return MyFitClubStore.list("messages").filter((message) => message.chatId === chatId);
+  return MyFitClubData.list("messages")
+    .filter((message) => message.chatId === chatId)
+    .sort((left, right) => new Date(left.createdAt || 0) - new Date(right.createdAt || 0));
 }
 
 function getLastMessage(chatId) {
@@ -472,7 +500,7 @@ function getLastMessage(chatId) {
 }
 
 function createMessage(chatId, text) {
-  const message = MyFitClubStore.add("messages", {
+  const message = MyFitClubData.add("messages", {
     chatId,
     author: state.currentUser.name,
     text,
@@ -567,7 +595,7 @@ function renderGroups() {
 }
 
 function renderSchedule() {
-  elements.scheduleList.innerHTML = MyFitClubStore.list("scheduleEvents")
+  elements.scheduleList.innerHTML = MyFitClubData.list("scheduleEvents")
     .map((event) => {
       const isBooked = state.bookedScheduleIds.has(event.id);
 
@@ -595,7 +623,7 @@ function renderSchedule() {
 }
 
 function renderNotifications() {
-  elements.notificationList.innerHTML = MyFitClubStore.list("notifications")
+  elements.notificationList.innerHTML = MyFitClubData.list("notifications")
     .map(
       (notification) => `
         <article class="notification-card">
@@ -613,18 +641,18 @@ function updateBookingCount() {
 }
 
 function renderDatabaseStats() {
-  elements.dbUsersCount.textContent = MyFitClubStore.count("users");
-  elements.dbChatsCount.textContent = MyFitClubStore.count("chats");
-  elements.dbMessagesCount.textContent = MyFitClubStore.count("messages");
-  elements.dbBookingsCount.textContent = MyFitClubStore.count("bookings");
-  elements.dbNotificationsCount.textContent = MyFitClubStore.count("notifications");
-  elements.dbCodesCount.textContent = MyFitClubStore.count("invitationCodes");
+  elements.dbUsersCount.textContent = MyFitClubData.count("users");
+  elements.dbChatsCount.textContent = MyFitClubData.count("chats");
+  elements.dbMessagesCount.textContent = MyFitClubData.count("messages");
+  elements.dbBookingsCount.textContent = MyFitClubData.count("bookings");
+  elements.dbNotificationsCount.textContent = MyFitClubData.count("notifications");
+  elements.dbCodesCount.textContent = MyFitClubData.count("invitationCodes");
 }
 
 function renderAdminPanel() {
-  const codes = MyFitClubStore.list("invitationCodes");
-  const users = MyFitClubStore.list("users");
-  const scheduleEvents = MyFitClubStore.list("scheduleEvents");
+  const codes = MyFitClubData.list("invitationCodes");
+  const users = MyFitClubData.list("users");
+  const scheduleEvents = MyFitClubData.list("scheduleEvents");
 
   elements.adminCodesCount.textContent = codes.filter((code) => code.isActive).length;
   elements.adminUsersCount.textContent = users.length;
@@ -733,7 +761,7 @@ elements.authForm.addEventListener("submit", async (event) => {
 
     const publicUser = toPublicUser(user);
     saveSession(publicUser);
-    enterApp(publicUser);
+    await enterApp(publicUser);
     return;
   }
 
@@ -756,12 +784,12 @@ elements.authForm.addEventListener("submit", async (event) => {
   const user = createUser({ name, email, password, code });
   users.push(user);
   saveUsers(users);
-  consumeInviteCode(code);
+  await MyFitClubData.consumeInviteCode(code);
 
   const publicUser = toPublicUser(user);
   elements.authSuccess.textContent = "Аккаунт создан. Входим в MyFitClub...";
   saveSession(publicUser);
-  enterApp(publicUser);
+  await enterApp(publicUser);
 });
 
 elements.clubMessageForm.addEventListener("submit", (event) => {
@@ -869,7 +897,7 @@ elements.adminCodeForm.addEventListener("submit", (event) => {
     return;
   }
 
-  MyFitClubStore.add("invitationCodes", {
+  MyFitClubData.add("invitationCodes", {
     code,
     role,
     roleName: getRoleName(role),
@@ -896,14 +924,14 @@ elements.adminGroupForm.addEventListener("submit", (event) => {
     return;
   }
 
-  const chat = MyFitClubStore.add("chats", {
+  const chat = MyFitClubData.add("chats", {
     title,
     type: "group",
     description,
     participantIds: ["all"],
     createdAt: new Date().toISOString(),
   });
-  MyFitClubStore.add("messages", {
+  MyFitClubData.add("messages", {
     chatId: chat.id,
     author: state.currentUser.name,
     text: `Группа "${title}" создана администратором.`,
@@ -934,7 +962,7 @@ elements.adminScheduleForm.addEventListener("submit", (event) => {
     return;
   }
 
-  MyFitClubStore.add("scheduleEvents", {
+  MyFitClubData.add("scheduleEvents", {
     title,
     trainer,
     place,
@@ -988,7 +1016,7 @@ async function bootstrap() {
           const publicUser = toPublicUser(profile);
           syncUserToLocalStore(publicUser);
           completeOnboarding();
-          enterApp(publicUser);
+          await enterApp(publicUser);
           return;
         }
       }
@@ -1003,7 +1031,7 @@ async function bootstrap() {
 
     if (savedUser) {
       completeOnboarding();
-      enterApp(savedUser);
+      await enterApp(savedUser);
     }
   }
 }

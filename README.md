@@ -10,7 +10,7 @@ https://prokli81.github.io/desktop-tutorial/
 
 1. GitHub Pages — ссылка в интернете (готово)
 2. Firebase Auth — общий вход (код готов, настройка: `MyFitClub/docs/firebase-setup.md`)
-3. Firestore — общие чаты (планируется)
+3. Firestore — общие чаты (код готов: `MyFitClub/docs/firestore-setup.md`)
 
 ## Быстрый старт локально
 

@@ -554,11 +554,11 @@
             <div class="panel database-panel">
               <div class="panel-heading">
                 <h3>Локальная база прототипа</h3>
-                <span class="badge">localStorage</span>
+                <span class="badge" id="data-backend-badge">localStorage</span>
               </div>
               <p>
-                Сейчас данные хранятся как коллекции в браузере. Позже этот слой
-                заменяется на Firestore или backend без изменения идеи экранов.
+                Сейчас данные хранятся как коллекции в браузере или в Firestore после входа
+                через Firebase. Сообщения в чатах обновляются для всех участников.
               </p>
               <div class="database-grid">
                 <article><strong id="db-users-count">0</strong><span>Users</span></article>
@@ -656,6 +656,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="firebase-bridge.js" defer></script>
+    <script src="firebase-data.js" defer></script>
+    <script src="data-layer.js" defer></script>
     <script src="data-store.js" defer></script>
     <script src="app.js" defer></script>
   </body>

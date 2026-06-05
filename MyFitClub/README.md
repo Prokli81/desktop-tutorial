@@ -19,7 +19,8 @@ and admins can communicate, view schedules and stay inside one club space.
 - onboarding flow with 3 welcome slides, screen map/design section inside the prototype;
 - PWA setup with manifest, app icon and service worker;
 - GitHub Pages workflow for publishing the `MyFitClub/` folder online;
-- Firebase Authentication bridge (`firebase-bridge.js`) with setup guide in `docs/firebase-setup.md`;
+- Firebase Authentication bridge;
+- Firestore sync for shared chats, schedule and bookings (`docs/firestore-setup.md`) (`firebase-bridge.js`) with setup guide in `docs/firebase-setup.md`;
 - Russian product blueprint in `docs/product-blueprint.md`;
 - step-by-step development order in `docs/step-by-step.md`.
 
