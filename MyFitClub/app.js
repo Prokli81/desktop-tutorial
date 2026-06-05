@@ -98,6 +98,12 @@ const elements = {
   dbNotificationsCount: document.querySelector("#db-notifications-count"),
   authBackendBadge: document.querySelector("#auth-backend-badge"),
   authBackendText: document.querySelector("#auth-backend-text"),
+  changePasswordPanel: document.querySelector("#change-password-panel"),
+  changePasswordForm: document.querySelector("#change-password-form"),
+  currentPassword: document.querySelector("#current-password"),
+  newPassword: document.querySelector("#new-password"),
+  changePasswordError: document.querySelector("#change-password-error"),
+  changePasswordSuccess: document.querySelector("#change-password-success"),
   firebaseStageBadge: document.querySelector("#firebase-stage-badge"),
   firebaseStageText: document.querySelector("#firebase-stage-text"),
   dbCodesCount: document.querySelector("#db-codes-count"),
@@ -805,6 +811,7 @@ async function enterApp(user) {
   elements.profileName.textContent = user.name;
   elements.profileAvatar.textContent = getInitials(user.name);
   elements.adminPanel.classList.toggle("hidden", user.role !== "admin");
+  elements.changePasswordPanel?.classList.toggle("hidden", !isFirebaseAuth());
 
   if (isFirebaseAuth()) {
     try {
@@ -1383,6 +1390,49 @@ elements.chatBackButton.addEventListener("click", () => activateView(state.previ
 
 elements.authTabs.forEach((tab) => {
   tab.addEventListener("click", () => setAuthMode(tab.dataset.authMode));
+});
+
+elements.changePasswordForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  elements.changePasswordError.textContent = "";
+  elements.changePasswordSuccess.textContent = "";
+
+  if (!isFirebaseAuth()) {
+    elements.changePasswordError.textContent = "Смена пароля доступна только в облачном режиме.";
+    return;
+  }
+
+  const currentPassword = elements.currentPassword.value;
+  const newPassword = elements.newPassword.value.trim();
+
+  if (!currentPassword || !newPassword) {
+    elements.changePasswordError.textContent = "Заполните оба поля.";
+    return;
+  }
+
+  if (newPassword.length < 6) {
+    elements.changePasswordError.textContent = "Новый пароль — минимум 6 символов.";
+    return;
+  }
+
+  if (currentPassword === newPassword) {
+    elements.changePasswordError.textContent = "Новый пароль должен отличаться от текущего.";
+    return;
+  }
+
+  const submitButton = elements.changePasswordForm.querySelector('button[type="submit"]');
+  submitButton.disabled = true;
+
+  try {
+    await window.MyFitClubFirebase.changePassword(currentPassword, newPassword);
+    elements.currentPassword.value = "";
+    elements.newPassword.value = "";
+    elements.changePasswordSuccess.textContent = "Пароль обновлён. При следующем входе используйте новый пароль.";
+  } catch (error) {
+    elements.changePasswordError.textContent = window.MyFitClubFirebase.mapAuthError(error);
+  } finally {
+    submitButton.disabled = false;
+  }
 });
 
 elements.resetPassword?.addEventListener("click", async () => {
