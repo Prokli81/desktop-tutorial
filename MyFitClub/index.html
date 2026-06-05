@@ -606,6 +606,17 @@
               </div>
 
               <div class="admin-section-grid">
+                <article class="admin-section-card admin-section-wide">
+                  <div class="panel-heading">
+                    <h3>Объявление клуба</h3>
+                    <span class="badge badge-blue">чат</span>
+                  </div>
+                  <form class="admin-form" id="admin-announcement-form">
+                    <textarea id="admin-announcement-text" rows="3" placeholder="Текст объявления для общего чата" required></textarea>
+                    <button class="secondary-button" type="submit">Опубликовать в ленту</button>
+                  </form>
+                </article>
+
                 <article class="admin-section-card">
                   <div class="panel-heading">
                     <h3>Пригласительные коды</h3>
@@ -668,7 +679,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
     <script src="firebase-bridge.js" defer></script>
+    <script src="firebase-messaging.js" defer></script>
     <script src="firebase-data.js" defer></script>
     <script src="data-layer.js" defer></script>
     <script src="data-store.js" defer></script>

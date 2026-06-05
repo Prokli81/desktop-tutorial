@@ -1,12 +1,14 @@
-const CACHE_NAME = "myfitclub-v4";
+const CACHE_NAME = "myfitclub-v5";
 const APP_ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./data-store.js",
   "./firebase-config.js",
+  "./firebase-config-sw.js",
   "./firebase-bridge.js",
   "./firebase-data.js",
+  "./firebase-messaging.js",
   "./data-layer.js",
   "./pwa-install.js",
   "./app.js",
@@ -53,3 +55,56 @@ self.addEventListener("fetch", (event) => {
     }),
   );
 });
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const chatId = event.notification.data?.chatId;
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+      const targetUrl = chatId
+        ? `${self.registration.scope}index.html#chat-${chatId}`
+        : `${self.registration.scope}index.html`;
+
+      for (const client of windowClients) {
+        if ("focus" in client) {
+          client.postMessage({ type: "open-chat", chatId: chatId || "club-main" });
+          return client.focus();
+        }
+      }
+
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+
+      return undefined;
+    }),
+  );
+});
+
+try {
+  importScripts("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js");
+  importScripts("https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js");
+  importScripts("./firebase-config-sw.js");
+
+  if (self.FIREBASE_CONFIG?.projectId) {
+    firebase.initializeApp(self.FIREBASE_CONFIG);
+    const messaging = firebase.messaging();
+
+    messaging.onBackgroundMessage((payload) => {
+      const title = payload.notification?.title || "MyFitClub";
+      const body = payload.notification?.body || "Новое сообщение в клубе";
+      const chatId = payload.data?.chatId || "club-main";
+
+      self.registration.showNotification(title, {
+        body,
+        icon: "./assets/icon.svg",
+        badge: "./assets/icon.svg",
+        data: { chatId },
+        tag: `chat-${chatId}`,
+      });
+    });
+  }
+} catch (error) {
+  console.warn("MyFitClub FCM service worker setup failed", error);
+}

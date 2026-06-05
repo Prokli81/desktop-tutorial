@@ -118,6 +118,22 @@
     return messages[error?.code] || error?.message || "Не удалось выполнить вход.";
   }
 
+  async function saveFcmToken(uid, token) {
+    const { db } = await ensureReady();
+    await db.collection("users").doc(uid).set(
+      {
+        fcmToken: token,
+        fcmUpdatedAt: new Date().toISOString(),
+      },
+      { merge: true },
+    );
+  }
+
+  async function updateUserAccess(uid, fields) {
+    const { db } = await ensureReady();
+    await db.collection("users").doc(uid).set(fields, { merge: true });
+  }
+
   async function updateLastSeen(uid) {
     const { db } = await ensureReady();
     await db.collection("users").doc(uid).set(
@@ -136,7 +152,9 @@
     signOut,
     saveUserProfile,
     getUserProfile,
+    saveFcmToken,
     updateLastSeen,
+    updateUserAccess,
     waitForAuthState,
     mapAuthError,
   };

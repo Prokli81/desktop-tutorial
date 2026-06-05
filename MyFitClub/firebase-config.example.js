@@ -9,5 +9,6 @@ window.MYFITCLUB_FIREBASE_CONFIG = {
   projectId: "ВАШ_ПРОЕКТ_ID",
   storageBucket: "ВАШ_ПРОЕКТ.appspot.com",
   messagingSenderId: "123456789012",
+  vapidKey: "ВАШ_VAPID_KEY",
   appId: "1:123456789012:web:abcdef123456",
 };

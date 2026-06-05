@@ -11,7 +11,8 @@ https://prokli81.github.io/desktop-tutorial/
 1. GitHub Pages — ссылка в интернете (готово)
 2. Firebase Auth — общий вход (код готов, настройка: `MyFitClub/docs/firebase-setup.md`)
 3. Firestore — общие чаты (код готов: `MyFitClub/docs/firestore-setup.md`)
-4. PWA + уведомления — `MyFitClub/docs/pwa-install.md`
+4. PWA + уведомления
+5. FCM push + админка — `MyFitClub/docs/fcm-setup.md` — `MyFitClub/docs/pwa-install.md`
 
 ## Быстрый старт локально
 

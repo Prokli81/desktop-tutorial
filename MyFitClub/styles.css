@@ -1372,3 +1372,35 @@ button {
     flex: 1;
   }
 }
+
+.admin-section-wide textarea {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  color: #f5fff9;
+  font: inherit;
+  min-height: 96px;
+  padding: 14px 16px;
+  resize: vertical;
+  width: 100%;
+}
+
+.admin-user-row {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.admin-user-action {
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  padding: 8px 12px;
+}
+
+@media (max-width: 520px) {
+  .admin-user-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

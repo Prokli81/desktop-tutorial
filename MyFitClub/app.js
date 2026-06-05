@@ -94,6 +94,8 @@ const elements = {
   adminCodesCount: document.querySelector("#admin-codes-count"),
   adminUsersCount: document.querySelector("#admin-users-count"),
   adminScheduleCount: document.querySelector("#admin-schedule-count"),
+  adminAnnouncementForm: document.querySelector("#admin-announcement-form"),
+  adminAnnouncementText: document.querySelector("#admin-announcement-text"),
   adminCodeForm: document.querySelector("#admin-code-form"),
   adminCodeInput: document.querySelector("#admin-code-input"),
   adminCodeRole: document.querySelector("#admin-code-role"),
@@ -232,10 +234,12 @@ function renderNotificationPermission() {
   }
 
   if (Notification.permission === "granted") {
-    elements.notificationPermissionBadge.textContent = "вкл";
-    elements.notificationPermissionText.textContent =
-      "Уведомления включены. Новые сообщения в чатах будут приходить, когда приложение свёрнуто.";
-    elements.enableNotifications.textContent = "Уведомления включены";
+    const pushReady = window.MyFitClubMessaging?.canUseMessaging?.();
+    elements.notificationPermissionBadge.textContent = pushReady ? "FCM" : "вкл";
+    elements.notificationPermissionText.textContent = pushReady
+      ? "Push Firebase подключён. Новые сообщения приходят даже при закрытом приложении (после деплоя Cloud Function)."
+      : "Уведомления браузера включены. Добавьте vapidKey для полноценного push.";
+    elements.enableNotifications.textContent = pushReady ? "Push включён" : "Уведомления включены";
     elements.enableNotifications.disabled = true;
     return;
   }
@@ -248,11 +252,73 @@ function renderNotificationPermission() {
     return;
   }
 
-  elements.notificationPermissionBadge.textContent = "выкл";
-  elements.notificationPermissionText.textContent =
-    "Включите уведомления, чтобы не пропускать новые сообщения в чатах клуба.";
+  if (window.MyFitClubMessaging?.canUseMessaging?.()) {
+    elements.notificationPermissionBadge.textContent = "push";
+    elements.notificationPermissionText.textContent =
+      "Можно включить настоящие push-уведомления Firebase (FCM) для телефона.";
+  } else {
+    elements.notificationPermissionBadge.textContent = "выкл";
+    elements.notificationPermissionText.textContent =
+      "Включите уведомления браузера. Для push на телефон добавьте vapidKey в firebase-config.js (см. docs/fcm-setup.md).";
+  }
   elements.enableNotifications.disabled = false;
   elements.enableNotifications.textContent = "Включить уведомления";
+}
+
+
+async function registerPushNotifications() {
+  if (!state.currentUser?.id) {
+    return { ok: false };
+  }
+
+  if (!window.MyFitClubMessaging?.canUseMessaging?.()) {
+    return { ok: false, reason: "no-vapid" };
+  }
+
+  try {
+    const result = await window.MyFitClubMessaging.registerToken(state.currentUser.id);
+    return result;
+  } catch (error) {
+    console.warn("FCM registration failed", error);
+    return { ok: false, reason: error?.message };
+  }
+}
+
+function isUserBlocked(user) {
+  return Boolean(user?.isBlocked);
+}
+
+async function setUserBlocked(userId, blocked) {
+  const users = loadUsers().map((user) =>
+    user.id === userId ? { ...user, isBlocked: blocked } : user,
+  );
+  saveUsers(users);
+
+  if (isFirebaseAuth()) {
+    await window.MyFitClubFirebase.updateUserAccess(userId, { isBlocked: blocked });
+  }
+
+  renderAdminPanel();
+}
+
+function handleServiceWorkerMessage(event) {
+  if (event.data?.type !== "open-chat") {
+    return;
+  }
+
+  const chatId = event.data.chatId || "club-main";
+
+  if (!state.currentUser) {
+    return;
+  }
+
+  if (chatId === "club-main") {
+    activateView("club-chat");
+    renderClubMessages();
+    return;
+  }
+
+  openChat(chatId, "groups");
 }
 
 function shouldNotifyForChat(chatId) {
@@ -489,6 +555,14 @@ async function loginWithFirebase(email, password) {
     };
   }
 
+  if (isUserBlocked(profile)) {
+    await window.MyFitClubFirebase.signOut();
+    return {
+      ok: false,
+      message: "Доступ заблокирован администратором клуба.",
+    };
+  }
+
   const publicUser = toPublicUser(profile);
   syncUserToLocalStore(publicUser);
   saveSession(publicUser);
@@ -517,6 +591,7 @@ async function signupWithFirebase({ name, email, password, code }) {
     roleName: profile.roleName,
     label: profile.label,
     createdAt: profile.createdAt,
+    isBlocked: false,
   });
 
   await MyFitClubData.consumeInviteCode(code);
@@ -655,6 +730,24 @@ async function enterApp(user) {
   refreshAppData();
   detectIncomingMessages();
   renderNotificationPermission();
+
+  if (Notification.permission === "granted") {
+    registerPushNotifications();
+  }
+
+  window.MyFitClubMessaging?.setupForegroundMessages?.((payload) => {
+    const chatId = payload.data?.chatId || "club-main";
+    const chat = getChat(chatId);
+    const message = {
+      id: payload.messageId || `fcm-${Date.now()}`,
+      chatId,
+      author: payload.notification?.title || "MyFitClub",
+      text: payload.notification?.body || "Новое сообщение",
+      userId: "fcm",
+      createdAt: new Date().toISOString(),
+    };
+    notifyIncomingMessage(message, chat);
+  });
 }
 
 async function resetDemo() {
@@ -930,14 +1023,24 @@ function renderAdminPanel() {
     ? users
         .map(
           (user) => `
-            <article>
-              <strong>${user.name}</strong>
-              <span>${user.email} · ${user.roleName}</span>
+            <article class="admin-user-row">
+              <div>
+                <strong>${user.name}</strong>
+                <span>${user.email} · ${user.roleName}${user.isBlocked ? " · заблокирован" : ""}</span>
+              </div>
+              <button
+                class="secondary-button admin-user-action"
+                type="button"
+                data-user-id="${user.id}"
+                data-user-blocked="${user.isBlocked ? "1" : "0"}"
+              >
+                ${user.isBlocked ? "Разблокировать" : "Заблокировать"}
+              </button>
             </article>
           `,
         )
         .join("")
-    : "<p>Пока есть только демо-пользователь после инициализации.</p>";
+    : "<p>Пока нет зарегистрированных пользователей.</p>";
 }
 
 function refreshAppData() {
@@ -1032,6 +1135,11 @@ elements.authForm.addEventListener("submit", async (event) => {
     if (!user) {
       elements.authError.textContent =
         "Аккаунт не найден или пароль неверный. Для демо используйте anna@myfitclub.demo / fitclub.";
+      return;
+    }
+
+    if (isUserBlocked(user)) {
+      elements.authError.textContent = "Доступ заблокирован администратором клуба.";
       return;
     }
 
@@ -1282,12 +1390,51 @@ elements.enableNotifications?.addEventListener("click", async () => {
   renderNotificationPermission();
 
   if (permission === "granted") {
+    const pushResult = await registerPushNotifications();
     new Notification("MyFitClub", {
-      body: "Уведомления включены. Новые сообщения в чатах будут приходить сюда.",
+      body: pushResult.ok
+        ? "Push-уведомления MyFitClub включены."
+        : "Уведомления браузера включены. Для FCM добавьте vapidKey.",
       icon: "assets/icon.svg",
     });
+    renderNotificationPermission();
   }
 });
+
+elements.adminAnnouncementForm?.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  if (state.currentUser?.role !== "admin") {
+    return;
+  }
+
+  const text = elements.adminAnnouncementText.value.trim();
+
+  if (!text) {
+    return;
+  }
+
+  createMessage("club-main", text);
+  elements.adminAnnouncementText.value = "";
+  renderClubMessages();
+  renderDatabaseStats();
+});
+
+elements.adminUserList?.addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-user-id]");
+
+  if (!button || state.currentUser?.role !== "admin") {
+    return;
+  }
+
+  const userId = button.dataset.userId;
+  const blocked = button.dataset.userBlocked === "1";
+  await setUserBlocked(userId, !blocked);
+});
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.addEventListener("message", handleServiceWorkerMessage);
+}
 
 elements.resetDemo.addEventListener("click", resetDemo);
 
@@ -1309,6 +1456,11 @@ async function bootstrap() {
         const profile = await window.MyFitClubFirebase.getUserProfile(authUser.uid);
 
         if (profile) {
+          if (isUserBlocked(profile)) {
+            await window.MyFitClubFirebase.signOut();
+            elements.authError.textContent = "Доступ заблокирован администратором клуба.";
+            return;
+          }
           const publicUser = toPublicUser(profile);
           syncUserToLocalStore(publicUser);
           completeOnboarding();
