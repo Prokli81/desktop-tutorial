@@ -1462,3 +1462,49 @@ body.install-banner-visible .app-shell {
   border-color: rgba(255, 110, 110, 0.28);
   color: #ffc7c7;
 }
+
+.link-button {
+  background: none;
+  border: 0;
+  color: #8dffc8;
+  font: inherit;
+  margin: 0 0 8px;
+  padding: 0;
+  text-align: left;
+  text-decoration: underline;
+}
+
+.diary-form {
+  margin-bottom: 16px;
+}
+
+.diary-list {
+  display: grid;
+  gap: 12px;
+}
+
+.diary-row {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 16px 18px;
+}
+
+.diary-row h3 {
+  margin: 0 0 4px;
+}
+
+.diary-row span,
+.diary-row p,
+.diary-row time {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.92rem;
+}
+
+.diary-row p {
+  margin: 6px 0 0;
+}

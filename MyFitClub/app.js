@@ -48,6 +48,7 @@ const elements = {
   authForm: document.querySelector("#auth-form"),
   authError: document.querySelector("#auth-error"),
   authSuccess: document.querySelector("#auth-success"),
+  resetPassword: document.querySelector("#reset-password"),
   authSubmit: document.querySelector("#auth-submit"),
   inviteCode: document.querySelector("#invite-code"),
   memberName: document.querySelector("#member-name"),
@@ -82,6 +83,13 @@ const elements = {
   groupList: document.querySelector("#group-list"),
   scheduleList: document.querySelector("#schedule-list"),
   bookingCount: document.querySelector("#booking-count"),
+  diaryForm: document.querySelector("#diary-form"),
+  diaryTitle: document.querySelector("#diary-title"),
+  diaryDuration: document.querySelector("#diary-duration"),
+  diaryNote: document.querySelector("#diary-note"),
+  diaryList: document.querySelector("#diary-list"),
+  diaryCountBadge: document.querySelector("#diary-count-badge"),
+  dbWorkoutsCount: document.querySelector("#db-workouts-count"),
   notificationList: document.querySelector("#notification-list"),
   dbUsersCount: document.querySelector("#db-users-count"),
   dbChatsCount: document.querySelector("#db-chats-count"),
@@ -580,7 +588,8 @@ function renderAuthBackendInfo() {
       elements.firebaseStageText.textContent =
         "Облачный вход активен. Войдите в аккаунт, чтобы подключить общую базу Firestore.";
     }
-    if (document.querySelector("#data-backend-badge")) {
+    setAuthMode(state.authMode);
+  if (document.querySelector("#data-backend-badge")) {
       document.querySelector("#data-backend-badge").textContent =
         window.MyFitClubData?.isCloudData?.() ? "Firestore" : "localStorage";
     }
@@ -896,6 +905,9 @@ function setAuthMode(mode) {
   });
   elements.signupOnlyFields.forEach((field) => field.classList.toggle("hidden", !isSignup));
   elements.loginOnlyFields.forEach((field) => field.classList.toggle("hidden", isSignup));
+  if (elements.resetPassword) {
+    elements.resetPassword.classList.toggle("hidden", isSignup || !isFirebaseAuth());
+  }
   elements.authSubmit.textContent = isSignup ? "Создать аккаунт" : "Войти";
   elements.memberPassword.autocomplete = isSignup ? "new-password" : "current-password";
 
@@ -1056,6 +1068,56 @@ function renderSchedule() {
     .join("");
 }
 
+
+function getMyWorkoutLogs() {
+  if (!state.currentUser) {
+    return [];
+  }
+
+  return MyFitClubData.list("workoutLogs")
+    .filter((log) => log.userId === state.currentUser.id)
+    .sort((left, right) => new Date(right.createdAt || 0) - new Date(left.createdAt || 0));
+}
+
+function renderDiary() {
+  const logs = getMyWorkoutLogs();
+
+  if (elements.diaryCountBadge) {
+    elements.diaryCountBadge.textContent = `${logs.length} записей`;
+  }
+
+  if (!elements.diaryList) {
+    return;
+  }
+
+  elements.diaryList.innerHTML = logs.length
+    ? logs
+        .map(
+          (log) => `
+            <article class="diary-row">
+              <div>
+                <h3>${log.title}</h3>
+                <span>${log.duration}</span>
+                <p>${log.note || "Без заметки"}</p>
+              </div>
+              <time>${new Date(log.createdAt).toLocaleDateString("ru-RU")}</time>
+            </article>
+          `,
+        )
+        .join("")
+    : '<p class="helper-text">Пока нет записей. Добавьте первую тренировку выше.</p>';
+}
+
+function createClubNotification({ title, text }) {
+  return MyFitClubData.add("notifications", {
+    time: "Сейчас",
+    title,
+    text,
+    isRead: false,
+    createdAt: new Date().toISOString(),
+  });
+}
+
 function renderNotifications() {
   elements.notificationList.innerHTML = MyFitClubData.list("notifications")
     .map(
@@ -1079,6 +1141,9 @@ function renderDatabaseStats() {
   elements.dbChatsCount.textContent = MyFitClubData.count("chats");
   elements.dbMessagesCount.textContent = MyFitClubData.count("messages");
   elements.dbBookingsCount.textContent = MyFitClubData.count("bookings");
+  if (elements.dbWorkoutsCount) {
+    elements.dbWorkoutsCount.textContent = MyFitClubData.count("workoutLogs");
+  }
   elements.dbNotificationsCount.textContent = MyFitClubData.count("notifications");
   elements.dbCodesCount.textContent = MyFitClubData.count("invitationCodes");
 }
@@ -1129,6 +1194,7 @@ function refreshAppData() {
   renderGroups();
   renderSchedule();
   renderNotifications();
+  renderDiary();
   updateBookingCount();
   renderDatabaseStats();
   renderAdminPanel();
@@ -1492,8 +1558,13 @@ elements.adminAnnouncementForm?.addEventListener("submit", (event) => {
   }
 
   createMessage("club-main", text);
+  createClubNotification({
+    title: "Объявление клуба",
+    text,
+  });
   elements.adminAnnouncementText.value = "";
   renderClubMessages();
+  renderNotifications();
   renderDatabaseStats();
 });
 

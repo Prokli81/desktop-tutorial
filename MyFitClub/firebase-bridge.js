@@ -48,6 +48,11 @@
     return credential.user;
   }
 
+  async function sendPasswordReset(email) {
+    const { auth } = await ensureReady();
+    await auth.sendPasswordResetEmail(email);
+  }
+
   async function signOut() {
     if (!isEnabled()) {
       return;
@@ -149,6 +154,7 @@
     init: ensureReady,
     signUp,
     signIn,
+    sendPasswordReset,
     signOut,
     saveUserProfile,
     getUserProfile,

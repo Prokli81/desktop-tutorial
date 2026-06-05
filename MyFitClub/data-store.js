@@ -209,6 +209,7 @@ const MyFitClubStore = (() => {
     ],
     clubMessages: [],
     bookings: [],
+    workoutLogs: [],
     notifications: [
       {
         id: "notification-yoga",

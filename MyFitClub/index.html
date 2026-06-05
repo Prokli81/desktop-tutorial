@@ -164,6 +164,9 @@
             <p class="hint signup-only" id="invite-help">
               Демо-коды: CLIENT2026, TRAINER2026, ADMIN2026
             </p>
+            <button class="link-button login-only hidden" id="reset-password" type="button">
+              Забыли пароль?
+            </button>
             <p class="hint login-only hidden" id="login-help">
               Демо-вход: anna@myfitclub.demo / fitclub
             </p>
@@ -216,6 +219,7 @@
             <button class="tab" type="button" data-view="direct">Личные</button>
             <button class="tab" type="button" data-view="groups">Группы</button>
             <button class="tab" type="button" data-view="schedule">Расписание</button>
+            <button class="tab" type="button" data-view="diary">Дневник</button>
             <button class="tab" type="button" data-view="notifications">Уведомления</button>
             <button class="tab" type="button" data-view="screens">Экраны</button>
             <button class="tab hidden" type="button" data-view="chat-detail">Диалог</button>
@@ -276,6 +280,7 @@
                 <div class="quick-actions">
                   <button class="secondary-button" type="button" data-quick-view="schedule">Записаться</button>
                   <button class="secondary-button" type="button" data-quick-view="club-chat">Написать в чат</button>
+                  <button class="secondary-button" type="button" data-quick-view="diary">Дневник</button>
                   <button class="secondary-button" type="button" data-quick-view="notifications">Уведомления</button>
                 </div>
               </article>
@@ -377,6 +382,26 @@
             </div>
             <p class="helper-text">Нажмите "Записаться", чтобы увидеть, как будет работать запись на занятие.</p>
             <div class="schedule-list" id="schedule-list"></div>
+          </section>
+
+          <section class="view" id="diary" data-view-panel>
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">дневник тренировок</p>
+                <h2>Мой прогресс</h2>
+              </div>
+              <span class="badge badge-blue" id="diary-count-badge">0 записей</span>
+            </div>
+            <p class="helper-text">
+              Записывайте тренировки — данные сохраняются в облаке и видны на всех ваших устройствах.
+            </p>
+            <form class="admin-form diary-form" id="diary-form">
+              <input id="diary-title" type="text" placeholder="Например: Силовая, йога, бег" required />
+              <input id="diary-duration" type="text" placeholder="Длительность, например 45 мин" required />
+              <input id="diary-note" type="text" placeholder="Заметка (необязательно)" />
+              <button class="secondary-button" type="submit">Добавить тренировку</button>
+            </form>
+            <div class="diary-list" id="diary-list"></div>
           </section>
 
           <section class="view" id="notifications" data-view-panel>
@@ -580,6 +605,7 @@
                 <article><strong id="db-chats-count">0</strong><span>Chats</span></article>
                 <article><strong id="db-messages-count">0</strong><span>Messages</span></article>
                 <article><strong id="db-bookings-count">0</strong><span>Bookings</span></article>
+                <article><strong id="db-workouts-count">0</strong><span>Workouts</span></article>
                 <article><strong id="db-notifications-count">0</strong><span>Notifications</span></article>
                 <article><strong id="db-codes-count">0</strong><span>Invite codes</span></article>
               </div>
