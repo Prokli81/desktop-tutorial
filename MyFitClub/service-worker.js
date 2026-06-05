@@ -1,4 +1,4 @@
-const CACHE_NAME = "myfitclub-v9";
+const CACHE_NAME = "myfitclub-v10";
 const APP_ASSETS = [
   "./",
   "./index.html",
@@ -12,6 +12,7 @@ const APP_ASSETS = [
   "./firebase-messaging.js",
   "./data-layer.js",
   "./pwa-install.js",
+  "./app-lock.js",
   "./app.js",
   "./manifest.webmanifest",
   "./assets/icon.svg",

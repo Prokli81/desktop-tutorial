@@ -1498,6 +1498,58 @@ body.install-banner-visible .app-shell {
   margin: 0 0 4px;
 }
 
+.app-lock {
+  align-items: center;
+  backdrop-filter: blur(12px);
+  background: rgba(7, 19, 15, 0.96);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 24px;
+  position: fixed;
+  z-index: 1200;
+}
+
+.app-lock-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  max-width: 360px;
+  padding: 28px 24px;
+  text-align: center;
+  width: 100%;
+}
+
+.app-lock-logo {
+  margin: 0 auto 12px;
+}
+
+.app-lock-input {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  color: var(--text);
+  font-size: 1.5rem;
+  letter-spacing: 0.35em;
+  margin: 16px 0 8px;
+  padding: 14px 16px;
+  text-align: center;
+  width: 100%;
+}
+
+.app-lock .primary-button {
+  margin-top: 12px;
+  width: 100%;
+}
+
+.app-lock .link-button {
+  display: block;
+  margin: 16px auto 0;
+  text-align: center;
+  width: 100%;
+}
+
 .diary-row span,
 .diary-row p,
 .diary-row time {
