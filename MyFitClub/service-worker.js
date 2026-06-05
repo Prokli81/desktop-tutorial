@@ -1,10 +1,11 @@
-const CACHE_NAME = "myfitclub-v5";
+const CACHE_NAME = "myfitclub-v6";
 const APP_ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./data-store.js",
   "./firebase-config.js",
+  "./firebase-health.js",
   "./firebase-config-sw.js",
   "./firebase-bridge.js",
   "./firebase-data.js",

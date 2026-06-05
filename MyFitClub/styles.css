@@ -1404,3 +1404,26 @@ button {
     flex-direction: column;
   }
 }
+
+.cloud-status {
+  background: rgba(255, 196, 88, 0.12);
+  border: 1px solid rgba(255, 196, 88, 0.28);
+  border-radius: 18px;
+  color: #ffe8b5;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+}
+
+.cloud-status[data-status="success"] {
+  background: rgba(88, 255, 173, 0.1);
+  border-color: rgba(88, 255, 173, 0.28);
+  color: #b8ffd9;
+}
+
+.cloud-status[data-status="error"] {
+  background: rgba(255, 110, 110, 0.12);
+  border-color: rgba(255, 110, 110, 0.28);
+  color: #ffc7c7;
+}

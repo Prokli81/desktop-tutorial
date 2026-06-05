@@ -34,6 +34,7 @@ const state = {
   activeView: "dashboard",
   lastMessageSnapshot: {},
   presenceTimer: null,
+  cloudReady: false,
 };
 
 const elements = {
@@ -59,6 +60,7 @@ const elements = {
   enableNotifications: document.querySelector("#enable-notifications"),
   notificationPermissionBadge: document.querySelector("#notification-permission-badge"),
   notificationPermissionText: document.querySelector("#notification-permission-text"),
+  cloudStatus: document.querySelector("#cloud-status"),
   resetDemo: document.querySelector("#reset-demo"),
   roleLabel: document.querySelector("#role-label"),
   welcomeTitle: document.querySelector("#welcome-title"),
@@ -463,8 +465,82 @@ function toPublicUser(user) {
 
 
 function isFirebaseAuth() {
-  return Boolean(window.MyFitClubFirebase?.isEnabled?.());
+  return Boolean(state.cloudReady && window.MyFitClubFirebase?.isEnabled?.());
 }
+
+function showCloudStatus(message, type = "warning") {
+  if (!elements.cloudStatus) {
+    return;
+  }
+
+  if (!message) {
+    elements.cloudStatus.classList.add("hidden");
+    elements.cloudStatus.textContent = "";
+    return;
+  }
+
+  elements.cloudStatus.textContent = message;
+  elements.cloudStatus.classList.remove("hidden");
+  elements.cloudStatus.dataset.status = type;
+}
+
+async function prepareCloudMode() {
+  const config = window.MYFITCLUB_FIREBASE_CONFIG || {};
+
+  if (!config.enabled) {
+    state.cloudReady = false;
+    showCloudStatus("");
+    return false;
+  }
+
+  const health = await window.MyFitClubFirebaseHealth.validateConfig(config);
+
+  if (!health.ok) {
+    state.cloudReady = false;
+
+    if (health.reason === "invalid-key") {
+      showCloudStatus(
+        "Облако временно недоступно: неверный apiKey в firebase-config.js. Скопируйте ключ заново из Firebase Console (см. docs/SETUP-RU.md). Сейчас работает локальный режим.",
+        "error",
+      );
+    } else if (health.reason === "network") {
+      showCloudStatus(
+        "Нет связи с Firebase. Проверьте интернет. Сейчас работает локальный режим.",
+        "warning",
+      );
+    } else {
+      showCloudStatus("");
+    }
+
+    return false;
+  }
+
+  try {
+    await window.MyFitClubFirebase.init();
+    state.cloudReady = true;
+    showCloudStatus("Облачный режим Firebase подключён.", "success");
+    return true;
+  } catch (error) {
+    state.cloudReady = false;
+    showCloudStatus(
+      "Firebase не удалось запустить. Работаем в локальном режиме. Подробнее: docs/SETUP-RU.md",
+      "error",
+    );
+    console.warn("Firebase init failed", error);
+    return false;
+  }
+}
+
+async function startLocalMode() {
+  seedDemoUsers();
+  const savedUser = loadSession();
+
+  if (savedUser) {
+    completeOnboarding();
+    await enterApp(savedUser);
+  }
+}
+
 
 function syncUserToLocalStore(publicUser) {
   const users = loadUsers();
@@ -1440,16 +1516,16 @@ elements.resetDemo.addEventListener("click", resetDemo);
 
 async function bootstrap() {
   initOnboarding();
-  renderAuthBackendInfo();
-  renderSyncStatus();
   state.bookedScheduleIds = new Set(loadBookings());
   setAuthMode("signup");
-  refreshAppData();
   elements.resetDemo.classList.add("hidden");
 
-  if (isFirebaseAuth()) {
+  const cloudAvailable = await prepareCloudMode();
+  renderAuthBackendInfo();
+  renderSyncStatus();
+
+  if (cloudAvailable) {
     try {
-      await window.MyFitClubFirebase.init();
       const authUser = await window.MyFitClubFirebase.waitForAuthState();
 
       if (authUser) {
@@ -1459,8 +1535,10 @@ async function bootstrap() {
           if (isUserBlocked(profile)) {
             await window.MyFitClubFirebase.signOut();
             elements.authError.textContent = "Доступ заблокирован администратором клуба.";
+            await startLocalMode();
             return;
           }
+
           const publicUser = toPublicUser(profile);
           syncUserToLocalStore(publicUser);
           completeOnboarding();
@@ -1469,19 +1547,17 @@ async function bootstrap() {
         }
       }
     } catch (error) {
-      console.warn("Firebase bootstrap failed", error);
-      elements.authError.textContent =
-        "Firebase включён, но подключение не удалось. Проверьте firebase-config.js.";
-    }
-  } else {
-    seedDemoUsers();
-    const savedUser = loadSession();
-
-    if (savedUser) {
-      completeOnboarding();
-      await enterApp(savedUser);
+      console.warn("Firebase session bootstrap failed", error);
+      state.cloudReady = false;
+      showCloudStatus(
+        "Сессия Firebase не загрузилась. Можно войти локально или зарегистрироваться заново.",
+        "warning",
+      );
     }
   }
+
+  refreshAppData();
+  await startLocalMode();
 }
 
 bootstrap();

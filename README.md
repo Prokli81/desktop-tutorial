@@ -1,3 +1,5 @@
+Полная настройка: **MyFitClub/docs/SETUP-RU.md**
+
 # desktop-tutorial — MyFitClub
 
 Закрытое приложение фитнес-клуба (прототип) в папке **MyFitClub/**.
