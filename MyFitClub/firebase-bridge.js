@@ -50,7 +50,12 @@
 
   async function sendPasswordReset(email) {
     const { auth } = await ensureReady();
-    await auth.sendPasswordResetEmail(email);
+    const continueUrl = `${window.location.origin}${window.location.pathname}`;
+
+    await auth.sendPasswordResetEmail(email, {
+      url: continueUrl,
+      handleCodeInApp: false,
+    });
   }
 
   async function signOut() {

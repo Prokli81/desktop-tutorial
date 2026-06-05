@@ -1385,6 +1385,37 @@ elements.authTabs.forEach((tab) => {
   tab.addEventListener("click", () => setAuthMode(tab.dataset.authMode));
 });
 
+elements.resetPassword?.addEventListener("click", async () => {
+  elements.authError.textContent = "";
+  elements.authSuccess.textContent = "";
+
+  if (!isFirebaseAuth()) {
+    elements.authError.textContent = "Восстановление пароля доступно только в облачном режиме Firebase.";
+    return;
+  }
+
+  const email = normalizeEmail(elements.memberEmail.value);
+
+  if (!email) {
+    elements.authError.textContent = "Введите email, на который зарегистрирован аккаунт.";
+    return;
+  }
+
+  elements.resetPassword.disabled = true;
+
+  try {
+    await window.MyFitClubFirebase.sendPasswordReset(email);
+    elements.authSuccess.textContent =
+      "Письмо отправлено на " +
+      email +
+      ". Проверьте входящие и папку «Спам», если письма нет через 2–3 минуты.";
+  } catch (error) {
+    elements.authError.textContent = window.MyFitClubFirebase.mapAuthError(error);
+  } finally {
+    elements.resetPassword.disabled = false;
+  }
+});
+
 elements.tabs.forEach((tab) => {
   tab.addEventListener("click", () => activateView(tab.dataset.view));
 });
