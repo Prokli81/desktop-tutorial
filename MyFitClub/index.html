@@ -425,8 +425,15 @@
               <input id="diary-title" type="text" placeholder="Например: Силовая, йога, бег" required />
               <input id="diary-duration" type="text" placeholder="Длительность, например 45 мин" required />
               <input id="diary-note" type="text" placeholder="Заметка (необязательно)" />
+              <label class="diary-photo-field" for="diary-photo">
+                <span>Фото прогресса (необязательно, бесплатно в облаке)</span>
+                <input id="diary-photo" type="file" accept="image/*" capture="environment" />
+              </label>
+              <img class="diary-photo-preview hidden" id="diary-photo-preview" alt="Превью фото" />
               <button class="secondary-button" type="submit">Добавить тренировку</button>
             </form>
+            <p class="form-error" id="diary-error" role="alert"></p>
+            <p class="form-success" id="diary-success" role="status"></p>
             <div class="diary-list" id="diary-list"></div>
           </section>
 
@@ -856,6 +863,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
     <script src="firebase-bridge.js" defer></script>
     <script src="firebase-messaging.js" defer></script>

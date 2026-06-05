@@ -1519,6 +1519,38 @@ body.install-banner-visible .app-shell {
   margin-bottom: 16px;
 }
 
+.diary-photo-field {
+  display: grid;
+  gap: 8px;
+}
+
+.diary-photo-field span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.diary-photo-field input[type="file"] {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.diary-photo-preview {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  max-height: 180px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.diary-row-photo {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  margin-top: 10px;
+  max-height: 140px;
+  object-fit: cover;
+  width: 100%;
+}
+
 .diary-list {
   display: grid;
   gap: 12px;

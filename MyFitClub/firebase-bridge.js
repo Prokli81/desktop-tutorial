@@ -29,6 +29,7 @@
           app,
           auth: firebase.auth(),
           db: firebase.firestore(),
+          storage: firebase.storage(),
         };
       });
     }
@@ -175,6 +176,57 @@
     );
   }
 
+  async function resizeImageFile(file, maxEdge = 1280, quality = 0.82) {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
+    const width = Math.round(bitmap.width * scale);
+    const height = Math.round(bitmap.height * scale);
+    const canvas = document.createElement("canvas");
+
+    canvas.width = width;
+    canvas.height = height;
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, width, height);
+    bitmap.close();
+
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error("Не удалось сжать фото."));
+            return;
+          }
+
+          resolve(blob);
+        },
+        "image/jpeg",
+        quality,
+      );
+    });
+  }
+
+  async function uploadProgressPhoto(userId, file) {
+    const { storage, auth } = await ensureReady();
+
+    if (!auth.currentUser || auth.currentUser.uid !== userId) {
+      throw new Error("Нужно войти через Firebase, чтобы загрузить фото.");
+    }
+
+    if (!file?.type?.startsWith("image/")) {
+      throw new Error("Можно загрузить только изображение.");
+    }
+
+    if (file.size > 8 * 1024 * 1024) {
+      throw new Error("Фото слишком большое. Выберите файл до 8 МБ.");
+    }
+
+    const blob = await resizeImageFile(file);
+    const fileName = `${Date.now()}.jpg`;
+    const ref = storage.ref(`progressPhotos/${userId}/${fileName}`);
+
+    await ref.put(blob, { contentType: "image/jpeg" });
+    return ref.getDownloadURL();
+  }
+
   window.MyFitClubFirebase = {
     isEnabled,
     init: ensureReady,
@@ -190,5 +242,6 @@
     updateUserAccess,
     waitForAuthState,
     mapAuthError,
+    uploadProgressPhoto,
   };
 })();
