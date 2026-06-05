@@ -1,4 +1,4 @@
-const CACHE_NAME = "myfitclub-v10";
+const CACHE_NAME = "myfitclub-v11";
 const APP_ASSETS = [
   "./",
   "./index.html",
@@ -58,6 +58,27 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data?.type !== "show-chat-notification") {
+    return;
+  }
+
+  const { title, body, chatId, notificationId } = event.data;
+
+  event.waitUntil(
+    self.registration.showNotification(title || "MyFitClub", {
+      body: body || "Новое сообщение",
+      icon: "./assets/icon.svg",
+      badge: "./assets/icon.svg",
+      data: { chatId: chatId || "club-main" },
+      tag: notificationId || `chat-${chatId || "club-main"}-${Date.now()}`,
+      silent: false,
+      vibrate: [180, 80, 180],
+      renotify: true,
+    }),
+  );
+});
+
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const chatId = event.notification.data?.chatId;
@@ -103,7 +124,10 @@ try {
         icon: "./assets/icon.svg",
         badge: "./assets/icon.svg",
         data: { chatId },
-        tag: `chat-${chatId}`,
+        tag: `chat-fcm-${chatId}-${Date.now()}`,
+        silent: false,
+        vibrate: [180, 80, 180],
+        renotify: true,
       });
     });
   }

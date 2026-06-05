@@ -1,6 +1,7 @@
 const SESSION_STORAGE_KEY = "myfitclub:user";
 const ONBOARDING_STORAGE_KEY = "myfitclub:onboarding-complete";
 const LAST_READ_STORAGE_KEY = "myfitclub:last-read";
+const CHAT_NOTIFY_STORAGE_KEY = "myfitclub:chat-notify";
 const PRESENCE_INTERVAL_MS = 60_000;
 
 const inviteCodes = {
@@ -61,6 +62,8 @@ const elements = {
   enableNotifications: document.querySelector("#enable-notifications"),
   notificationPermissionBadge: document.querySelector("#notification-permission-badge"),
   notificationPermissionText: document.querySelector("#notification-permission-text"),
+  notificationPermissionHint: document.querySelector("#notification-permission-hint"),
+  chatNotifyToggles: document.querySelectorAll(".chat-notify-toggle"),
   cloudStatus: document.querySelector("#cloud-status"),
   resetDemo: document.querySelector("#reset-demo"),
   roleLabel: document.querySelector("#role-label"),
@@ -258,43 +261,233 @@ function renderSyncStatus() {
   elements.syncStatus.classList.add("local");
 }
 
+function isChatNotifyPreferred() {
+  return localStorage.getItem(CHAT_NOTIFY_STORAGE_KEY) === "1";
+}
+
+function setChatNotifyPreferred(enabled) {
+  localStorage.setItem(CHAT_NOTIFY_STORAGE_KEY, enabled ? "1" : "0");
+}
+
+function isChatNotifyActive() {
+  return (
+    isChatNotifyPreferred() &&
+    "Notification" in window &&
+    Notification.permission === "granted"
+  );
+}
+
+function renderChatNotifyToggle() {
+  const active = isChatNotifyActive();
+  const denied = "Notification" in window && Notification.permission === "denied";
+  const unsupported = !("Notification" in window);
+
+  elements.chatNotifyToggles.forEach((button) => {
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", active ? "true" : "false");
+    button.disabled = unsupported || denied;
+
+    const label = button.querySelector(".chat-notify-label");
+
+    if (label) {
+      if (unsupported) {
+        label.textContent = "Нет уведомлений";
+      } else if (denied) {
+        label.textContent = "Заблокировано";
+      } else if (active) {
+        label.textContent = "Уведомления: вкл";
+      } else {
+        label.textContent = "Уведомления: выкл";
+      }
+    }
+  });
+}
+
 function renderNotificationPermission() {
   if (!elements.notificationPermissionBadge) {
     return;
   }
 
+  renderChatNotifyToggle();
+
   if (!("Notification" in window)) {
     elements.notificationPermissionBadge.textContent = "нет";
     elements.notificationPermissionText.textContent =
-      "Этот браузер не поддерживает push-уведомления.";
+      "Этот браузер не поддерживает уведомления на телефоне.";
+    if (elements.notificationPermissionHint) {
+      elements.notificationPermissionHint.textContent = "";
+    }
     elements.enableNotifications.disabled = true;
-    return;
-  }
-
-  if (Notification.permission === "granted") {
-    const pushReady = window.MyFitClubMessaging?.canUseMessaging?.();
-    elements.notificationPermissionBadge.textContent = pushReady ? "FCM+" : "вкл";
-    elements.notificationPermissionText.textContent = pushReady
-      ? "Уведомления включены (бесплатно). FCM+ — опционально, требует платный тариф Firebase Blaze."
-      : "Уведомления включены (бесплатно). Сообщения приходят, когда приложение открыто или свёрнуто на телефоне.";
-    elements.enableNotifications.textContent = "Уведомления включены";
-    elements.enableNotifications.disabled = true;
+    elements.enableNotifications.textContent = "Недоступно";
     return;
   }
 
   if (Notification.permission === "denied") {
     elements.notificationPermissionBadge.textContent = "блок";
     elements.notificationPermissionText.textContent =
-      "Браузер заблокировал уведомления. Разрешите их в настройках сайта.";
+      "Браузер заблокировал уведомления. Откройте настройки сайта в Chrome/Safari и разрешите уведомления.";
+    if (elements.notificationPermissionHint) {
+      elements.notificationPermissionHint.textContent =
+      "На Android: ⋮ → «Сведения о сайте» → Уведомления. На iPhone: «Настройки» → Safari → Уведомления.";
+    }
     elements.enableNotifications.disabled = true;
+    elements.enableNotifications.textContent = "Заблокировано";
+    return;
+  }
+
+  if (isChatNotifyActive()) {
+    elements.notificationPermissionBadge.textContent = "вкл";
+    elements.notificationPermissionText.textContent =
+      "Новые сообщения в чатах приходят на телефон со звуком (стандартный звук системы). Работает, когда приложение свёрнуто или открыто в фоне.";
+    if (elements.notificationPermissionHint) {
+      elements.notificationPermissionHint.textContent =
+        "Отключить можно кнопкой «Уведомления» на вкладке «Чат» или здесь.";
+    }
+    elements.enableNotifications.disabled = false;
+    elements.enableNotifications.textContent = "Отключить уведомления";
+    return;
+  }
+
+  if (Notification.permission === "granted" && !isChatNotifyPreferred()) {
+    elements.notificationPermissionBadge.textContent = "выкл";
+    elements.notificationPermissionText.textContent =
+      "Разрешение браузера есть, но уведомления о чатах отключены в приложении.";
+    if (elements.notificationPermissionHint) {
+      elements.notificationPermissionHint.textContent = "";
+    }
+    elements.enableNotifications.disabled = false;
+    elements.enableNotifications.textContent = "Включить уведомления";
     return;
   }
 
   elements.notificationPermissionBadge.textContent = "выкл";
   elements.notificationPermissionText.textContent =
-    "Включите уведомления — это бесплатно. Работают на телефоне, когда MyFitClub установлен или открыт в браузере.";
+    "Включите уведомления — бесплатно. При новом сообщении в чате телефон издаст стандартный звук.";
+  if (elements.notificationPermissionHint) {
+    elements.notificationPermissionHint.textContent =
+      "Лучше установить MyFitClub на главный экран (см. Профиль → Защита приложения).";
+  }
   elements.enableNotifications.disabled = false;
   elements.enableNotifications.textContent = "Включить уведомления";
+}
+
+async function enableChatNotifications() {
+  if (!("Notification" in window)) {
+    return { ok: false, message: "Браузер не поддерживает уведомления." };
+  }
+
+  let permission = Notification.permission;
+
+  if (permission === "default") {
+    permission = await Notification.requestPermission();
+  }
+
+  if (permission === "denied") {
+    renderNotificationPermission();
+    return {
+      ok: false,
+      message: "Уведомления заблокированы. Разрешите их в настройках браузера для этого сайта.",
+    };
+  }
+
+  if (permission !== "granted") {
+    return { ok: false, message: "Не удалось получить разрешение на уведомления." };
+  }
+
+  setChatNotifyPreferred(true);
+  await registerPushNotifications();
+  await showChatNotification({
+    title: "MyFitClub",
+    body: "Уведомления о чатах включены. Звук — как у обычных сообщений на телефоне.",
+    chatId: "club-main",
+    messageId: "notify-enabled",
+  });
+  renderNotificationPermission();
+  return { ok: true };
+}
+
+function disableChatNotifications() {
+  setChatNotifyPreferred(false);
+  renderNotificationPermission();
+  return { ok: true };
+}
+
+async function toggleChatNotifications() {
+  if (isChatNotifyActive()) {
+    return disableChatNotifications();
+  }
+
+  return enableChatNotifications();
+}
+
+async function showChatNotification({ title, body, chatId, messageId }) {
+  if (!isChatNotifyActive()) {
+    return;
+  }
+
+  const payload = {
+    type: "show-chat-notification",
+    title,
+    body,
+    chatId: chatId || "club-main",
+    notificationId: `chat-${chatId || "club-main"}-${messageId || Date.now()}`,
+  };
+
+  if ("serviceWorker" in navigator) {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+
+      if (registration.active) {
+        registration.active.postMessage(payload);
+        return;
+      }
+
+      await registration.showNotification(payload.title, {
+        body: payload.body,
+        icon: "assets/icon.svg",
+        badge: "assets/icon.svg",
+        data: { chatId: payload.chatId },
+        tag: payload.notificationId,
+        silent: false,
+        vibrate: [180, 80, 180],
+        renotify: true,
+      });
+      return;
+    } catch (error) {
+      console.warn("Service worker notification failed", error);
+    }
+  }
+
+  if ("Notification" in window && Notification.permission === "granted") {
+    const notification = new Notification(title, {
+      body,
+      icon: "assets/icon.svg",
+      tag: payload.notificationId,
+      silent: false,
+      data: { chatId: payload.chatId },
+    });
+
+    notification.onclick = () => {
+      window.focus();
+      handleNotificationOpen(payload.chatId);
+    };
+  }
+}
+
+function handleNotificationOpen(chatId) {
+  if (!state.currentUser) {
+    return;
+  }
+
+  const chat = getChat(chatId);
+
+  if (!chat || chatId === "club-main") {
+    activateView("club-chat");
+    renderClubMessages();
+    return;
+  }
+
+  openChat(chatId, chat.type === "direct" ? "direct" : "groups");
 }
 
 
@@ -365,30 +558,19 @@ function shouldNotifyForChat(chatId) {
 }
 
 function notifyIncomingMessage(message, chat) {
-  if (!("Notification" in window) || Notification.permission !== "granted") {
+  if (!isChatNotifyActive()) {
     return;
   }
 
   const title = chat?.title || "MyFitClub";
   const body = `${message.author}: ${message.text}`;
-  const notification = new Notification(title, {
-    body,
-    icon: "assets/icon.svg",
-    tag: `chat-${message.chatId}`,
-  });
 
-  notification.onclick = () => {
-    window.focus();
-    if (!chat) {
-      return;
-    }
-    if (chat.id === "club-main") {
-      activateView("club-chat");
-      renderClubMessages();
-      return;
-    }
-    openChat(chat.id, chat.type === "direct" ? "direct" : "groups");
-  };
+  showChatNotification({
+    title,
+    body,
+    chatId: message.chatId,
+    messageId: message.id,
+  });
 }
 
 function detectIncomingMessages() {
@@ -1861,21 +2043,26 @@ elements.onboardingDots.querySelectorAll(".dot").forEach((dot) => {
 });
 
 elements.enableNotifications?.addEventListener("click", async () => {
-  if (!("Notification" in window)) {
+  if (isChatNotifyActive()) {
+    disableChatNotifications();
     return;
   }
 
-  const permission = await Notification.requestPermission();
-  renderNotificationPermission();
+  const result = await enableChatNotifications();
 
-  if (permission === "granted") {
-    await registerPushNotifications();
-    new Notification("MyFitClub", {
-      body: "Уведомления включены (бесплатно). Новые сообщения будут приходить на этот телефон.",
-      icon: "assets/icon.svg",
-    });
-    renderNotificationPermission();
+  if (!result.ok && result.message) {
+    elements.notificationPermissionText.textContent = result.message;
   }
+});
+
+elements.chatNotifyToggles.forEach((button) => {
+  button.addEventListener("click", async () => {
+    const result = await toggleChatNotifications();
+
+    if (!result.ok && result.message) {
+      elements.notificationPermissionText.textContent = result.message;
+    }
+  });
 });
 
 elements.adminAnnouncementForm?.addEventListener("submit", (event) => {

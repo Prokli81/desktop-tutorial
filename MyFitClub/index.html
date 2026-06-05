@@ -330,7 +330,19 @@
                 <p class="eyebrow">общий чат</p>
                 <h2>Клубная лента</h2>
               </div>
-              <span class="online-dot" id="online-count">онлайн</span>
+              <div class="section-heading-actions">
+                <button
+                  class="chat-notify-toggle"
+                  id="chat-notify-toggle"
+                  type="button"
+                  aria-pressed="false"
+                  title="Уведомления о новых сообщениях"
+                >
+                  <span class="chat-notify-icon" aria-hidden="true">🔔</span>
+                  <span class="chat-notify-label">Уведомления</span>
+                </button>
+                <span class="online-dot" id="online-count">онлайн</span>
+              </div>
             </div>
             <div class="chat-card" id="club-chat-list"></div>
             <form class="message-form" id="club-message-form">
@@ -365,7 +377,19 @@
                 <p class="eyebrow" id="chat-detail-type">диалог</p>
                 <h2 id="chat-detail-title">Чат</h2>
               </div>
-              <button class="ghost-button" id="chat-back-button" type="button">Назад</button>
+              <div class="section-heading-actions">
+                <button
+                  class="chat-notify-toggle"
+                  id="chat-notify-toggle-detail"
+                  type="button"
+                  aria-pressed="false"
+                  title="Уведомления о новых сообщениях"
+                >
+                  <span class="chat-notify-icon" aria-hidden="true">🔔</span>
+                  <span class="chat-notify-label">Уведомления</span>
+                </button>
+                <button class="ghost-button" id="chat-back-button" type="button">Назад</button>
+              </div>
             </div>
             <p class="helper-text" id="chat-detail-description">Сообщения выбранного диалога.</p>
             <div class="chat-card" id="chat-detail-list"></div>
@@ -420,10 +444,12 @@
               </div>
               <p id="notification-permission-text">
                 Включите уведомления, чтобы не пропускать новые сообщения в чатах клуба.
+                Переключатель также есть на вкладке «Чат».
               </p>
               <button class="secondary-button" id="enable-notifications" type="button">
                 Включить уведомления
               </button>
+              <p class="hint" id="notification-permission-hint"></p>
             </div>
             <div class="notification-list" id="notification-list"></div>
           </section>
