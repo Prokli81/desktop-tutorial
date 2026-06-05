@@ -5,6 +5,7 @@
   const banner = document.querySelector("#install-banner");
   const installButton = document.querySelector("#install-app");
   const dismissButton = document.querySelector("#dismiss-install");
+  const closeButton = document.querySelector("#close-install");
   const installHint = document.querySelector("#install-hint");
 
   function isStandalone() {
@@ -14,12 +15,17 @@
     );
   }
 
-  function isIos() {
-    return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+  function isDismissed() {
+    return localStorage.getItem(STORAGE_KEY) === "1";
+  }
+
+  function hideBanner() {
+    banner?.classList.add("hidden");
+    document.body.classList.remove("install-banner-visible");
   }
 
   function showBanner(message) {
-    if (!banner || isStandalone() || localStorage.getItem(STORAGE_KEY) === "1") {
+    if (!banner || isStandalone() || isDismissed()) {
       return;
     }
 
@@ -28,12 +34,18 @@
     }
 
     banner.classList.remove("hidden");
+    document.body.classList.add("install-banner-visible");
+  }
+
+  function dismissBanner() {
+    localStorage.setItem(STORAGE_KEY, "1");
+    hideBanner();
   }
 
   window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
     deferredPrompt = event;
-    showBanner("Установите MyFitClub как приложение на главный экран.");
+    showBanner("Браузер предлагает установить MyFitClub на главный экран.");
   });
 
   installButton?.addEventListener("click", async () => {
@@ -41,36 +53,23 @@
       deferredPrompt.prompt();
       await deferredPrompt.userChoice;
       deferredPrompt = null;
-      banner?.classList.add("hidden");
+      hideBanner();
       return;
     }
 
-    if (isIos()) {
-      showBanner(
-        "На iPhone: кнопка «Поделиться» → «На экран Домой». На Android: меню браузера → «Установить приложение».",
-      );
+    dismissBanner();
+  });
+
+  dismissButton?.addEventListener("click", dismissBanner);
+  closeButton?.addEventListener("click", dismissBanner);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && banner && !banner.classList.contains("hidden")) {
+      dismissBanner();
     }
   });
 
-  dismissButton?.addEventListener("click", () => {
-    localStorage.setItem(STORAGE_KEY, "1");
-    banner?.classList.add("hidden");
-  });
-
-  window.addEventListener("load", () => {
-    if (isStandalone()) {
-      return;
-    }
-
-    if (isIos()) {
-      showBanner(
-        "На iPhone: Safari → «Поделиться» → «На экран Домой», чтобы открывать MyFitClub как приложение.",
-      );
-      return;
-    }
-
-    if (window.MyFitClubFirebase?.isEnabled?.()) {
-      showBanner("Можно установить MyFitClub на главный экран телефона.");
-    }
-  });
+  if (banner && isDismissed()) {
+    hideBanner();
+  }
 })();

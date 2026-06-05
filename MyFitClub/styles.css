@@ -1313,19 +1313,54 @@ button {
   color: rgba(255, 255, 255, 0.62);
 }
 
+body.install-banner-visible {
+  padding-bottom: calc(120px + env(safe-area-inset-bottom));
+}
+
+body.install-banner-visible .app-shell {
+  padding-bottom: 8px;
+}
+
 .install-banner {
   align-items: center;
   background: linear-gradient(180deg, rgba(8, 28, 22, 0.98), rgba(4, 14, 11, 0.98));
   border-top: 1px solid rgba(88, 255, 173, 0.18);
   bottom: 0;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35);
   display: flex;
-  gap: 16px;
+  gap: 12px;
   justify-content: space-between;
   left: 0;
-  padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
+  max-height: 42vh;
+  overflow: auto;
+  padding: 16px 48px 16px 20px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
   position: fixed;
   right: 0;
-  z-index: 30;
+  z-index: 40;
+}
+
+.install-banner.hidden {
+  display: none;
+}
+
+.install-banner-close {
+  background: rgba(255, 255, 255, 0.08);
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 1.4rem;
+  height: 36px;
+  line-height: 1;
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: 36px;
+}
+
+.install-banner-copy {
+  flex: 1;
+  min-width: 0;
 }
 
 .install-banner p {

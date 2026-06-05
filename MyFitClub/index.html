@@ -691,13 +691,14 @@
     <script src="pwa-install.js" defer></script>
     <script src="app.js" defer></script>
     <div class="install-banner hidden" id="install-banner" role="region" aria-label="Установка приложения">
-      <div>
+      <button class="install-banner-close" id="close-install" type="button" aria-label="Закрыть">×</button>
+      <div class="install-banner-copy">
         <strong>Установить MyFitClub</strong>
         <p id="install-hint">Откройте клуб как приложение на главном экране телефона.</p>
       </div>
       <div class="install-banner-actions">
         <button class="primary-button" id="install-app" type="button">Установить</button>
-        <button class="ghost-button" id="dismiss-install" type="button">Позже</button>
+        <button class="ghost-button" id="dismiss-install" type="button">Закрыть</button>
       </div>
     </div>
   </body>
