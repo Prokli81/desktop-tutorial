@@ -123,8 +123,8 @@
     watchCollection(db, "messages", (doc) => ({ id: doc.id, ...doc.data() }));
     watchCollection(db, "scheduleEvents", (doc) => ({ id: doc.id, ...doc.data() }));
     watchCollection(db, "bookings", (doc) => ({ id: doc.id, ...doc.data() }));
-    watchCollection(db, "notifications",
-    "workoutLogs", (doc) => ({ id: doc.id, ...doc.data() }));
+    watchCollection(db, "notifications", (doc) => ({ id: doc.id, ...doc.data() }));
+    watchCollection(db, "workoutLogs", (doc) => ({ id: doc.id, ...doc.data() }));
     watchCollection(db, "invitationCodes", (doc) => ({ id: doc.id, ...doc.data() }));
     watchCollection(db, "users", (doc) => ({ id: doc.id, ...doc.data() }));
 

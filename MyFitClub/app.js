@@ -90,6 +90,10 @@ const elements = {
   diaryTitle: document.querySelector("#diary-title"),
   diaryDuration: document.querySelector("#diary-duration"),
   diaryNote: document.querySelector("#diary-note"),
+  diaryPhoto: document.querySelector("#diary-photo"),
+  diaryPhotoPreview: document.querySelector("#diary-photo-preview"),
+  diaryError: document.querySelector("#diary-error"),
+  diarySuccess: document.querySelector("#diary-success"),
   diaryList: document.querySelector("#diary-list"),
   diaryCountBadge: document.querySelector("#diary-count-badge"),
   dbWorkoutsCount: document.querySelector("#db-workouts-count"),
@@ -1381,6 +1385,29 @@ function renderSchedule() {
 }
 
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function isSafePhotoUrl(url) {
+  return typeof url === "string" && /^https:\/\//.test(url);
+}
+
+function resetDiaryPhotoPreview() {
+  if (elements.diaryPhoto) {
+    elements.diaryPhoto.value = "";
+  }
+
+  if (elements.diaryPhotoPreview) {
+    elements.diaryPhotoPreview.src = "";
+    elements.diaryPhotoPreview.classList.add("hidden");
+  }
+}
+
 function getMyWorkoutLogs() {
   if (!state.currentUser) {
     return [];
@@ -1404,18 +1431,23 @@ function renderDiary() {
 
   elements.diaryList.innerHTML = logs.length
     ? logs
-        .map(
-          (log) => `
+        .map((log) => {
+          const photoHtml = isSafePhotoUrl(log.photoUrl)
+            ? `<img class="diary-row-photo" src="${escapeHtml(log.photoUrl)}" alt="Фото тренировки" loading="lazy" />`
+            : "";
+
+          return `
             <article class="diary-row">
               <div>
-                <h3>${log.title}</h3>
-                <span>${log.duration}</span>
-                <p>${log.note || "Без заметки"}</p>
+                <h3>${escapeHtml(log.title)}</h3>
+                <span>${escapeHtml(log.duration)}</span>
+                <p>${escapeHtml(log.note || "Без заметки")}</p>
+                ${photoHtml}
               </div>
               <time>${new Date(log.createdAt).toLocaleDateString("ru-RU")}</time>
             </article>
-          `,
-        )
+          `;
+        })
         .join("")
     : '<p class="helper-text">Пока нет записей. Добавьте первую тренировку выше.</p>';
 }
@@ -1629,6 +1661,84 @@ elements.authForm.addEventListener("submit", async (event) => {
   elements.authSuccess.textContent = "Аккаунт создан. Входим в MyFitClub...";
   saveSession(publicUser);
   await enterApp(publicUser);
+});
+
+elements.diaryPhoto?.addEventListener("change", () => {
+  const file = elements.diaryPhoto.files?.[0];
+
+  if (!file || !elements.diaryPhotoPreview) {
+    resetDiaryPhotoPreview();
+    return;
+  }
+
+  elements.diaryPhotoPreview.src = URL.createObjectURL(file);
+  elements.diaryPhotoPreview.classList.remove("hidden");
+});
+
+elements.diaryForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  if (!state.currentUser) {
+    return;
+  }
+
+  elements.diaryError.textContent = "";
+  elements.diarySuccess.textContent = "";
+
+  const title = elements.diaryTitle.value.trim();
+  const duration = elements.diaryDuration.value.trim();
+  const note = elements.diaryNote.value.trim();
+  const photoFile = elements.diaryPhoto?.files?.[0];
+  const submitButton = elements.diaryForm.querySelector('button[type="submit"]');
+
+  if (!title || !duration) {
+    elements.diaryError.textContent = "Укажите название и длительность тренировки.";
+    return;
+  }
+
+  submitButton.disabled = true;
+
+  try {
+    let photoUrl = "";
+
+    if (photoFile) {
+      if (!isFirebaseAuth() || !MyFitClubData.isCloudData()) {
+        elements.diaryError.textContent =
+          "Фото сохраняются в облаке. Войдите через Firebase и включите Firestore (см. PROSTO-RU.md).";
+        return;
+      }
+
+      photoUrl = await window.MyFitClubFirebase.uploadProgressPhoto(
+        state.currentUser.id,
+        photoFile,
+      );
+    }
+
+    MyFitClubData.add("workoutLogs", {
+      userId: state.currentUser.id,
+      title,
+      duration,
+      note,
+      photoUrl: photoUrl || null,
+      createdAt: new Date().toISOString(),
+    });
+
+    elements.diaryTitle.value = "";
+    elements.diaryDuration.value = "";
+    elements.diaryNote.value = "";
+    resetDiaryPhotoPreview();
+    elements.diarySuccess.textContent = photoUrl
+      ? "Тренировка и фото сохранены в облаке."
+      : "Тренировка сохранена.";
+    renderDiary();
+    renderDatabaseStats();
+  } catch (error) {
+    elements.diaryError.textContent =
+      error?.message ||
+      "Не удалось сохранить запись. Если загружали фото — включите Storage в Firebase (docs/storage-setup-RU.md).";
+  } finally {
+    submitButton.disabled = false;
+  }
 });
 
 elements.clubMessageForm.addEventListener("submit", (event) => {
