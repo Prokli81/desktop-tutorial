@@ -1379,6 +1379,47 @@ body.install-banner-visible .app-shell {
   margin-bottom: 16px;
 }
 
+.section-heading-actions {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  gap: 10px;
+}
+
+.chat-notify-toggle {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.82rem;
+  font-weight: 700;
+  gap: 6px;
+  padding: 8px 14px;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.chat-notify-toggle.active {
+  background: rgba(52, 232, 158, 0.16);
+  border-color: rgba(52, 232, 158, 0.45);
+  color: var(--green);
+}
+
+.chat-notify-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.chat-notify-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
 .tab-unread {
   background: #58ffad;
   border-radius: 999px;
