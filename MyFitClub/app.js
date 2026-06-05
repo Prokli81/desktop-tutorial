@@ -533,6 +533,7 @@ async function prepareCloudMode() {
 
 async function startLocalMode() {
   seedDemoUsers();
+  refreshAppData();
   const savedUser = loadSession();
 
   if (savedUser) {
@@ -1556,7 +1557,6 @@ async function bootstrap() {
     }
   }
 
-  refreshAppData();
   await startLocalMode();
 }
 
