@@ -508,7 +508,12 @@ async function prepareCloudMode() {
 
     if (health.reason === "invalid-key") {
       showCloudStatus(
-        "Облако временно недоступно: неверный apiKey в firebase-config.js. Скопируйте ключ заново из Firebase Console (см. docs/SETUP-RU.md). Сейчас работает локальный режим.",
+        "Облако временно недоступно: неверный apiKey. Обновите страницу (потяните вниз). Если не помогло — см. docs/SETUP-RU.md. Сейчас работает локальный режим.",
+        "error",
+      );
+    } else if (health.reason === "domain-missing") {
+      showCloudStatus(
+        `Нужно добавить сайт в Firebase: Authentication → Настройки → Авторизованные домены → добавить «${health.host}». Ссылка: console.firebase.google.com/project/myfitclub-4d1b8/authentication/settings`,
         "error",
       );
     } else if (health.reason === "network") {
