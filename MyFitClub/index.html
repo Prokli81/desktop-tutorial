@@ -139,7 +139,7 @@
               id="member-name"
               name="member-name"
               type="text"
-              value="Анна"
+              placeholder="Ваше имя"
               autocomplete="name"
             />
 
@@ -148,7 +148,7 @@
               id="member-email"
               name="member-email"
               type="email"
-              value="new-client@myfitclub.demo"
+              placeholder="your@email.ru"
               autocomplete="email"
               required
             />
@@ -158,9 +158,9 @@
               id="member-password"
               name="member-password"
               type="password"
-              value="fitclub"
+              placeholder="Минимум 6 символов"
               autocomplete="current-password"
-              minlength="4"
+              minlength="6"
               required
             />
 
@@ -170,12 +170,12 @@
               id="invite-code"
               name="invite-code"
               type="text"
-              value="CLIENT2026"
+              placeholder="Например CLIENT2026"
               autocomplete="off"
               aria-describedby="invite-help"
             />
             <p class="hint signup-only" id="invite-help">
-              Демо-коды: CLIENT2026, TRAINER2026, ADMIN2026
+              Коды клуба: CLIENT2026, TRAINER2026, ADMIN2026
             </p>
             <button class="link-button login-only hidden" id="reset-password" type="button">
               Забыли пароль?
@@ -243,7 +243,7 @@
             <div class="welcome-card">
               <div>
                 <p class="eyebrow" id="role-label">клиент клуба</p>
-                <h2 id="welcome-title">Привет, Анна!</h2>
+                <h2 id="welcome-title">Добро пожаловать!</h2>
                 <p>
                   Сегодня в клубе: силовая тренировка, йога и обновления в
                   общем чате.
@@ -511,7 +511,7 @@
                 <div>
                   <span class="screen-number">01</span>
                   <h3>Вход и регистрация</h3>
-                  <p>Доступ только по пригласительному коду, роли и демо-аккаунт.</p>
+                  <p>Доступ по пригласительному коду и роли: клиент, тренер, админ.</p>
                 </div>
               </article>
 
@@ -609,7 +609,7 @@
               <div class="avatar" id="profile-avatar">А</div>
               <div>
                 <p class="eyebrow" id="profile-role">клиент</p>
-                <h2 id="profile-name">Анна</h2>
+                <h2 id="profile-name">Участник</h2>
                 <p>Цель: улучшить форму, питание и регулярность тренировок.</p>
               </div>
             </div>
@@ -631,8 +631,7 @@
                 <span class="badge" id="auth-backend-badge">локально</span>
               </div>
               <p id="auth-backend-text">
-                В этой демо-версии роль назначается пригласительным кодом:
-                клиент, тренер или администратор. Данные сохраняются в браузере.
+                Роль назначается пригласительным кодом: клиент, тренер или администратор.
               </p>
             </div>
 

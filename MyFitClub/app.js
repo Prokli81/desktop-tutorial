@@ -753,7 +753,9 @@ async function prepareCloudMode() {
 }
 
 async function startLocalMode() {
-  seedDemoUsers();
+  if (!state.cloudReady) {
+    seedDemoUsers();
+  }
   refreshAppData();
   const savedUser = loadSession();
 
@@ -811,7 +813,7 @@ function renderAuthBackendInfo() {
 
   elements.authBackendBadge.textContent = "локально";
   elements.authBackendText.textContent =
-    "Роль назначается пригласительным кодом. Аккаунты и пароли хранятся только в этом браузере.";
+    "Облако Firebase не подключено. Войдите после появления зелёной строки «Облачный режим подключён».";
   elements.firebaseStageBadge.textContent = "этап 2";
   elements.firebaseStageText.textContent =
     "Firebase подготовлен в коде. Чтобы включить общий вход, настройте firebase-config.js (см. docs/firebase-setup.md).";
@@ -1231,14 +1233,7 @@ function setAuthMode(mode) {
   }
   elements.authSubmit.textContent = isSignup ? "Создать аккаунт" : "Войти";
   elements.memberPassword.autocomplete = isSignup ? "new-password" : "current-password";
-
-  if (!isSignup && normalizeEmail(elements.memberEmail.value) === "new-client@myfitclub.demo") {
-    elements.memberEmail.value = "anna@myfitclub.demo";
-  }
-
-  if (isSignup && normalizeEmail(elements.memberEmail.value) === "anna@myfitclub.demo") {
-    elements.memberEmail.value = "new-client@myfitclub.demo";
-  }
+  elements.memberPassword.placeholder = isSignup ? "Минимум 6 символов" : "Ваш пароль";
 
   elements.authError.textContent = "";
   elements.authSuccess.textContent = "";
@@ -1625,10 +1620,12 @@ elements.authForm.addEventListener("submit", async (event) => {
         return;
       }
 
-      const name =
-        elements.memberName.value.trim() ||
-        inviteCodes[code]?.defaultName ||
-        "Участник";
+      const name = elements.memberName.value.trim();
+
+      if (!name) {
+        elements.authError.textContent = "Введите ваше имя.";
+        return;
+      }
 
       const signupResult = await signupWithFirebase({ name, email, password, code });
       if (!signupResult.ok) {
@@ -1650,7 +1647,7 @@ elements.authForm.addEventListener("submit", async (event) => {
 
     if (!user) {
       elements.authError.textContent =
-        "Аккаунт не найден или пароль неверный. Для демо используйте anna@myfitclub.demo / fitclub.";
+        "Аккаунт не найден или пароль неверный. Нужен облачный вход (Firebase) или регистрация по коду.";
       return;
     }
 
@@ -1679,8 +1676,13 @@ elements.authForm.addEventListener("submit", async (event) => {
     return;
   }
 
-  const name =
-    elements.memberName.value.trim() || inviteCodes[code]?.defaultName || "Участник";
+  const name = elements.memberName.value.trim();
+
+  if (!name) {
+    elements.authError.textContent = "Введите ваше имя.";
+    return;
+  }
+
   const user = createUser({ name, email, password, code });
   users.push(user);
   saveUsers(users);
