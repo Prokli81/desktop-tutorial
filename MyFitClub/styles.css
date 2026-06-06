@@ -1571,16 +1571,28 @@ body.install-banner-visible .app-shell {
   margin: 0 0 4px;
 }
 
+body.app-locked {
+  height: 100%;
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
 .app-lock {
   align-items: center;
-  backdrop-filter: blur(12px);
-  background: rgba(7, 19, 15, 0.96);
+  background: #07130f;
   display: flex;
   inset: 0;
   justify-content: center;
+  overscroll-behavior: none;
   padding: 24px;
   position: fixed;
+  touch-action: none;
   z-index: 1200;
+}
+
+.app-lock.hidden {
+  display: none;
 }
 
 .app-lock-card {

@@ -18,8 +18,19 @@
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="assets/icon.svg" />
     <link rel="stylesheet" href="styles.css" />
+    <style>
+      body.booting .app-shell,
+      body.booting .install-banner {
+        visibility: hidden;
+      }
+
+      body.booting {
+        background: #07130f;
+        overflow: hidden;
+      }
+    </style>
   </head>
-  <body>
+  <body class="booting">
     <div class="app-shell">
       <header class="topbar">
         <div class="brand">
@@ -880,7 +891,10 @@
         <p class="eyebrow">защищённый режим</p>
         <h2>MyFitClub</h2>
         <p id="app-lock-hint">Введите PIN, который вы задавали в Профиле → Защита приложения</p>
-        <p class="hint app-lock-forgot">Забыли PIN? Нажмите кнопку ниже — PIN отключится, войдёте по email и паролю.</p>
+        <p class="hint app-lock-forgot">
+          Забыли PIN? Нажмите кнопку ниже. Или откройте ссылку с
+          <strong>?no-pin=1</strong> в конце адреса.
+        </p>
         <input
           id="app-lock-pin"
           class="app-lock-input"

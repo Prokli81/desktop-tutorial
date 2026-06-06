@@ -1012,6 +1012,7 @@ function showAppLockScreen() {
   elements.appLockPin.value = "";
   elements.appLockError.textContent = "";
   elements.appLock.classList.remove("hidden");
+  document.body.classList.add("app-locked");
   elements.appLockPin.focus();
 }
 
@@ -1019,7 +1020,13 @@ function hideAppLockScreen() {
   elements.appLock?.classList.add("hidden");
   elements.appLockPin.value = "";
   elements.appLockError.textContent = "";
+  document.body.classList.remove("app-locked");
   getAppLock()?.scheduleInactivityLock();
+}
+
+function finishBooting() {
+  document.body.classList.remove("booting");
+  document.body.classList.add("app-ready");
 }
 
 function renderAppSecurityPanel() {
@@ -1089,9 +1096,7 @@ function startAppSecurity() {
     });
   }
 
-  if (lock.isEnabled()) {
-    lock.lock();
-  }
+  hideAppLockScreen();
 }
 
 function stopAppSecurity() {
@@ -2242,11 +2247,32 @@ if ("serviceWorker" in navigator) {
 
 elements.resetDemo.addEventListener("click", resetDemo);
 
+function clearPinFromUrlIfRequested() {
+  const params = new URLSearchParams(window.location.search);
+
+  if (!params.has("no-pin")) {
+    return false;
+  }
+
+  getAppLock()?.clearPinForLogout?.();
+  params.delete("no-pin");
+  const query = params.toString();
+  const nextUrl = `${window.location.pathname}${query ? `?${query}` : ""}`;
+  window.history.replaceState({}, "", nextUrl);
+  return true;
+}
+
 async function bootstrap() {
+  const pinWasCleared = clearPinFromUrlIfRequested();
   initOnboarding();
   state.bookedScheduleIds = new Set(loadBookings());
   setAuthMode("login");
   elements.resetDemo.classList.add("hidden");
+  hideAppLockScreen();
+
+  if (pinWasCleared) {
+    showCloudStatus("PIN-защита отключена. Войдите по email и паролю.", "success");
+  }
 
   const cloudAvailable = await prepareCloudMode();
   renderAuthBackendInfo();
@@ -2288,7 +2314,7 @@ async function bootstrap() {
   await startLocalMode();
 }
 
-bootstrap();
+bootstrap().finally(finishBooting);
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
