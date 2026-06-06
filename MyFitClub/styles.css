@@ -1616,10 +1616,13 @@ body.install-banner-visible .app-shell {
   width: 100%;
 }
 
-.app-lock .link-button {
-  display: block;
-  margin: 16px auto 0;
+.app-lock-forgot {
+  margin: 0 0 12px;
   text-align: center;
+}
+
+.app-lock-logout-btn {
+  margin-top: 12px;
   width: 100%;
 }
 

@@ -1953,9 +1953,10 @@ elements.appLockPin?.addEventListener("keydown", (event) => {
   }
 });
 
-elements.appLockLogout?.addEventListener("click", () => {
+elements.appLockLogout?.addEventListener("click", async () => {
+  getAppLock()?.clearPinForLogout?.();
   stopAppSecurity();
-  resetDemo();
+  await resetDemo();
 });
 
 elements.changePasswordForm?.addEventListener("submit", async (event) => {

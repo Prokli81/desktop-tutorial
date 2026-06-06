@@ -174,6 +174,12 @@
     );
   }
 
+  function clearPinForLogout() {
+    saveConfig(null);
+    locked = false;
+    clearInactivityTimer();
+  }
+
   window.MyFitClubAppLock = {
     isEnabled,
     isLocked,
@@ -183,6 +189,7 @@
     setupPin,
     disablePin,
     changePin,
+    clearPinForLogout,
     bindInactivityTracking,
     scheduleInactivityLock,
     clearInactivityTimer,

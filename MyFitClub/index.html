@@ -879,7 +879,8 @@
         <div class="brand-mark app-lock-logo" aria-hidden="true">M</div>
         <p class="eyebrow">защищённый режим</p>
         <h2>MyFitClub</h2>
-        <p id="app-lock-hint">Введите PIN-код для входа в приложение</p>
+        <p id="app-lock-hint">Введите PIN, который вы задавали в Профиле → Защита приложения</p>
+        <p class="hint app-lock-forgot">Забыли PIN? Нажмите кнопку ниже — PIN отключится, войдёте по email и паролю.</p>
         <input
           id="app-lock-pin"
           class="app-lock-input"
@@ -893,7 +894,9 @@
         />
         <p class="form-error" id="app-lock-error" role="alert"></p>
         <button class="primary-button" id="app-lock-submit" type="button">Разблокировать</button>
-        <button class="link-button" id="app-lock-logout" type="button">Выйти из аккаунта</button>
+        <button class="ghost-button app-lock-logout-btn" id="app-lock-logout" type="button">
+          Забыли PIN? Выйти из аккаунта
+        </button>
       </div>
     </div>
 
