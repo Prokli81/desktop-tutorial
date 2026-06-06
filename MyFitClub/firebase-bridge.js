@@ -115,20 +115,24 @@
     };
   }
 
-  function waitForAuthState() {
+  async function waitForAuthState() {
     if (!isEnabled()) {
-      return Promise.resolve(null);
+      return null;
     }
 
-    return ensureReady().then(
-      ({ auth }) =>
-        new Promise((resolve) => {
-          const unsubscribe = auth.onAuthStateChanged((user) => {
-            unsubscribe();
-            resolve(user);
-          });
-        }),
-    );
+    const { auth } = await ensureReady();
+
+    if (typeof auth.authStateReady === "function") {
+      await auth.authStateReady();
+      return auth.currentUser;
+    }
+
+    return new Promise((resolve) => {
+      const unsubscribe = auth.onAuthStateChanged((user) => {
+        unsubscribe();
+        resolve(user);
+      });
+    });
   }
 
   function mapAuthError(error) {
