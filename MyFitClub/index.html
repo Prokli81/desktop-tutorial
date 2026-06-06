@@ -18,8 +18,19 @@
     <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="assets/icon.svg" />
     <link rel="stylesheet" href="styles.css" />
+    <style>
+      body.booting .app-shell,
+      body.booting .install-banner {
+        visibility: hidden;
+      }
+
+      body.booting {
+        background: #07130f;
+        overflow: hidden;
+      }
+    </style>
   </head>
-  <body>
+  <body class="booting">
     <div class="app-shell">
       <header class="topbar">
         <div class="brand">

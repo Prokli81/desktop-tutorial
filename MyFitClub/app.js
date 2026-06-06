@@ -1012,6 +1012,7 @@ function showAppLockScreen() {
   elements.appLockPin.value = "";
   elements.appLockError.textContent = "";
   elements.appLock.classList.remove("hidden");
+  document.body.classList.add("app-locked");
   elements.appLockPin.focus();
 }
 
@@ -1019,7 +1020,13 @@ function hideAppLockScreen() {
   elements.appLock?.classList.add("hidden");
   elements.appLockPin.value = "";
   elements.appLockError.textContent = "";
+  document.body.classList.remove("app-locked");
   getAppLock()?.scheduleInactivityLock();
+}
+
+function finishBooting() {
+  document.body.classList.remove("booting");
+  document.body.classList.add("app-ready");
 }
 
 function renderAppSecurityPanel() {
@@ -2307,7 +2314,7 @@ async function bootstrap() {
   await startLocalMode();
 }
 
-bootstrap();
+bootstrap().finally(finishBooting);
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
