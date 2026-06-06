@@ -518,6 +518,11 @@ function isUserBlocked(user) {
 }
 
 async function setUserBlocked(userId, blocked) {
+  if (blocked && userId === state.currentUser?.id) {
+    showCloudStatus("Нельзя заблокировать свой собственный аккаунт.", "warning");
+    return;
+  }
+
   const users = loadUsers().map((user) =>
     user.id === userId ? { ...user, isBlocked: blocked } : user,
   );
@@ -528,6 +533,25 @@ async function setUserBlocked(userId, blocked) {
   }
 
   renderAdminPanel();
+}
+
+async function handleBlockedAccess() {
+  if (isFirebaseAuth()) {
+    try {
+      await window.MyFitClubFirebase.signOut();
+    } catch (error) {
+      console.warn("Firebase signOut after block failed", error);
+    }
+  }
+
+  clearSession();
+  stopAppSecurity();
+  stopPresenceHeartbeat();
+  window.MyFitClubData.destroy();
+  showAuthScreen();
+  completeOnboarding();
+  elements.authError.textContent =
+    "Доступ заблокирован администратором клуба. Обратитесь к админу или снимите блокировку в Firebase Console (см. docs/BLOCKED-RU.md).";
 }
 
 function handleServiceWorkerMessage(event) {
@@ -966,6 +990,17 @@ function saveSession(user) {
   localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
 }
 
+function clearSession() {
+  localStorage.removeItem(SESSION_STORAGE_KEY);
+}
+
+function showAuthScreen() {
+  state.currentUser = null;
+  elements.appScreen.classList.add("hidden");
+  elements.resetDemo.classList.add("hidden");
+  elements.inviteScreen.classList.remove("hidden");
+}
+
 function loadBookings() {
   return MyFitClubData.list("bookings").map((booking) => booking.scheduleId || booking);
 }
@@ -1171,12 +1206,9 @@ async function resetDemo() {
     }
   }
 
-  localStorage.removeItem(SESSION_STORAGE_KEY);
-  state.currentUser = null;
-  elements.appScreen.classList.add("hidden");
+  clearSession();
+  showAuthScreen();
   elements.onboardingScreen.classList.add("hidden");
-  elements.inviteScreen.classList.remove("hidden");
-  elements.resetDemo.classList.add("hidden");
   elements.authError.textContent = "";
   elements.authSuccess.textContent = "";
 }
@@ -2264,6 +2296,36 @@ function clearPinFromUrlIfRequested() {
   return true;
 }
 
+async function restoreFirebaseSession() {
+  const authUser = await window.MyFitClubFirebase.waitForAuthState();
+
+  if (!authUser) {
+    return false;
+  }
+
+  const profile = await window.MyFitClubFirebase.getUserProfile(authUser.uid);
+
+  if (!profile) {
+    await window.MyFitClubFirebase.signOut();
+    clearSession();
+    elements.authError.textContent =
+      "Профиль в облаке не найден. Войдите снова или зарегистрируйтесь по пригласительному коду.";
+    return false;
+  }
+
+  if (isUserBlocked(profile)) {
+    await handleBlockedAccess();
+    return true;
+  }
+
+  const publicUser = toPublicUser(profile);
+  syncUserToLocalStore(publicUser);
+  saveSession(publicUser);
+  completeOnboarding();
+  await enterApp(publicUser);
+  return true;
+}
+
 async function bootstrap() {
   const pinWasCleared = clearPinFromUrlIfRequested();
   initOnboarding();
@@ -2283,31 +2345,15 @@ async function bootstrap() {
 
   if (cloudAvailable) {
     try {
-      const authUser = await window.MyFitClubFirebase.waitForAuthState();
+      const restored = await restoreFirebaseSession();
 
-      if (authUser) {
-        const profile = await window.MyFitClubFirebase.getUserProfile(authUser.uid);
-
-        if (profile) {
-          if (isUserBlocked(profile)) {
-            await window.MyFitClubFirebase.signOut();
-            elements.authError.textContent = "Доступ заблокирован администратором клуба.";
-            await startLocalMode();
-            return;
-          }
-
-          const publicUser = toPublicUser(profile);
-          syncUserToLocalStore(publicUser);
-          completeOnboarding();
-          await enterApp(publicUser);
-          return;
-        }
+      if (restored) {
+        return;
       }
     } catch (error) {
       console.warn("Firebase session bootstrap failed", error);
-      state.cloudReady = false;
       showCloudStatus(
-        "Сессия Firebase не загрузилась. Можно войти локально или зарегистрироваться заново.",
+        "Сессия Firebase не загрузилась. Войдите по email и паролю ещё раз.",
         "warning",
       );
     }
