@@ -257,6 +257,11 @@ function renderPhone() {
     state.invoiceType === "in"
       ? "Сканируйте упаковки при поступлении. Подтверждение — на ПК."
       : "Сканируйте перед отгрузкой. На ПК укажут заказ и клиента, затем подтвердят.";
+
+  const httpsHint = document.querySelector("#camera-https-hint");
+  if (httpsHint) {
+    httpsHint.classList.toggle("hidden", window.isSecureContext);
+  }
 }
 
 function renderDashboard() {
