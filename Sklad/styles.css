@@ -234,6 +234,15 @@ textarea {
   background: #000;
 }
 
+.scanner-fallback {
+  padding: 16px;
+  line-height: 1.5;
+}
+
+.scanner-fallback p {
+  margin: 0 0 8px;
+}
+
 .manual-form {
   display: grid;
   gap: 10px;

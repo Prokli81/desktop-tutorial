@@ -137,8 +137,30 @@ function handleScan(rawCode) {
   syncAfterChange();
 }
 
+function showScannerFallback(reason) {
+  const box = document.querySelector("#scanner");
+  if (!box) {
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="scanner-fallback">
+      <p><strong>Камера недоступна</strong></p>
+      <p class="muted small">${reason}</p>
+      <p class="muted small">Пока используйте поле <strong>«Код вручную»</strong> ниже — это нормально.</p>
+    </div>
+  `;
+}
+
 async function startScanner() {
   if (state.role !== "phone" || state.scannerRunning || typeof Html5Qrcode === "undefined") {
+    return;
+  }
+
+  if (!window.isSecureContext) {
+    showScannerFallback(
+      "По адресу http://192.168… браузер блокирует камеру. Нужен https:// или ввод кода вручную.",
+    );
     return;
   }
 
@@ -155,8 +177,9 @@ async function startScanner() {
     state.scannerRunning = true;
   } catch (error) {
     console.warn("Scanner unavailable", error);
-    document.querySelector("#scanner").innerHTML =
-      '<p class="hint" style="padding:16px">Камера недоступна. Введите код вручную или откройте сайт по HTTPS.</p>';
+    showScannerFallback(
+      "Разрешите доступ к камере в настройках Chrome или введите код вручную.",
+    );
   }
 }
 
