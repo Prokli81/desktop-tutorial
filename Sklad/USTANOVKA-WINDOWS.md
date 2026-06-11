@@ -15,7 +15,39 @@ Copy-Item -Path "$HOME\sklad-temp\Sklad\*" -Destination C:\Users\Grimm\sklad -Re
 
 В `C:\Users\Grimm\sklad` должны быть файлы: `index.html`, `app.js`, `start-windows.bat`.
 
-## 2. Запуск каждый раз
+## 2. Установить Python (если пишет «Python was not found»)
+
+**Способ А — сайт (проще всего)**
+
+1. Откройте https://www.python.org/downloads/
+2. **Download Python 3.12** (или новее)
+3. При установке **обязательно** включите галочку **«Add python.exe to PATH»**
+4. **Install Now**
+5. **Закройте PowerShell и откройте заново**
+
+Проверка:
+
+```powershell
+python --version
+```
+
+**Способ Б — одна команда (Windows 10/11)**
+
+```powershell
+winget install Python.Python.3.12
+```
+
+После установки закройте и снова откройте PowerShell.
+
+**Быстрая проверка перед установкой:**
+
+```powershell
+py -m http.server 4174
+```
+
+Если `py` сработал — Python уже есть, просто команда `python` не в PATH.
+
+## 3. Запуск каждый раз
 
 **Способ А — двойной щелчок**
 
