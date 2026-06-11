@@ -1,0 +1,4 @@
+<!-- Vставьте в android/app/src/main/AndroidManifest.xml перед <application -->
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-feature android:name="android.hardware.camera" android:required="false" />
+<uses-permission android:name="android.permission.INTERNET" />

@@ -1,0 +1,11 @@
+{
+  "appId": "com.sklad.warehouse",
+  "appName": "Sklad",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

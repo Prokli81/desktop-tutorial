@@ -20,10 +20,14 @@ Copy-Item -Path "$HOME\sklad-temp\Sklad\*" -Destination C:\Users\Grimm\sklad -Re
 **Способ А — сайт (проще всего)**
 
 1. Откройте https://www.python.org/downloads/
-2. **Download Python 3.12** (или новее)
-3. При установке **обязательно** включите галочку **«Add python.exe to PATH»**
-4. **Install Now**
-5. **Закройте PowerShell и откройте заново**
+2. Большая жёлтая кнопка **Download Python 3.12** (нужен файл **`.exe`**, не «source tarball»)
+3. Запустите установщик. На первом экране:
+   - включите **Add python.exe to PATH** (внизу окна)
+   - нажмите **Install Now**
+4. Дождитесь **Setup was successful**
+5. **Полностью закройте PowerShell** и откройте новое окно
+
+**Если спрашивает про компоненты (Customize):** достаточно стандартной установки; можно включить **pip** и **py launcher** (обычно уже отмечены).
 
 Проверка:
 
@@ -61,6 +65,15 @@ python -m http.server 4174
 ```
 
 Окно **не закрывайте**.
+
+**Способ В — проверка + запуск одним файлом**
+
+После копирования файлов Sklad:
+
+```powershell
+cd C:\Users\Grimm\sklad
+powershell -ExecutionPolicy Bypass -File .\proverka-python.ps1
+```
 
 ## 4. Открыть в браузере
 

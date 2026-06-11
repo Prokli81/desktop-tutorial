@@ -157,9 +157,11 @@ async function startScanner() {
     return;
   }
 
-  if (!window.isSecureContext) {
+  const isNativeApp = Boolean(window.Capacitor?.isNativePlatform?.());
+
+  if (!window.isSecureContext && !isNativeApp) {
     showScannerFallback(
-      "По адресу http://192.168… браузер блокирует камеру. Нужен https:// или ввод кода вручную.",
+      "По адресу http://192.168… браузер блокирует камеру. Установите APK или https://, либо ввод вручную.",
     );
     return;
   }
