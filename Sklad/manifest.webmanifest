@@ -1,18 +1,28 @@
 {
+  "id": "/sklad",
   "name": "Sklad — склад",
   "short_name": "Sklad",
   "description": "Учёт склада мебели и техники: скан на телефоне, подтверждение на ПК.",
-  "start_url": "./index.html",
+  "start_url": "./index.html?source=pwa",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0b1628",
   "theme_color": "#0f2744",
   "lang": "ru",
+  "categories": ["business", "productivity"],
   "icons": [
     {
       "src": "assets/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
+    },
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
     }
   ]
 }
