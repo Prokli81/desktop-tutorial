@@ -2,10 +2,10 @@
 
 ## Cursor Cloud specific instructions
 
-This repository contains dependency-free static prototypes:
+This repository contains separate dependency-free static prototypes (they do not share code or config):
 
-- **MyFitClub** — private fitness club messenger (`MyFitClub/`)
-- **Sklad** — warehouse app for furniture/appliances (`Sklad/`)
+- **MyFitClub** — private fitness club messenger (`MyFitClub/`) — do not modify when working on Sklad
+- **Sklad** — warehouse app for furniture/appliances (`Sklad/`) — standalone, own Firebase config
 
 - **Dependencies:** None to install. The VM update script can remain a no-op
   (`true`).

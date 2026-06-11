@@ -1,16 +1,13 @@
 const SkladCloudSync = (() => {
   const DOC_PATH = "sklad/state";
+  const APP_NAME = "sklad";
   let enabled = false;
   let applyingRemote = false;
   let unsubscribe = null;
   let onRemoteChange = null;
 
   function getConfig() {
-    return (
-      window.SKLAD_FIREBASE_CONFIG ||
-      (window.MYFITCLUB_FIREBASE_CONFIG?.enabled ? window.MYFITCLUB_FIREBASE_CONFIG : null) ||
-      null
-    );
+    return window.SKLAD_FIREBASE_CONFIG || null;
   }
 
   function isEnabled() {
@@ -26,8 +23,14 @@ const SkladCloudSync = (() => {
 
   async function getDb() {
     const config = getConfig();
-    const app =
-      firebase.apps && firebase.apps.length ? firebase.app() : firebase.initializeApp(config);
+    let app;
+
+    try {
+      app = firebase.app(APP_NAME);
+    } catch {
+      app = firebase.initializeApp(config, APP_NAME);
+    }
+
     return firebase.firestore(app);
   }
 
