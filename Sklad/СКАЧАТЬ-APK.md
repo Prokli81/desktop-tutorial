@@ -6,6 +6,9 @@ APK собирается автоматически на GitHub. Flutter на П
 
 https://github.com/Prokli81/desktop-tutorial/actions/workflows/sklad-apk.yml
 
+**Готовая сборка (зелёная галочка):**  
+https://github.com/Prokli81/desktop-tutorial/actions/runs/27464650237
+
 ## Шаг 2. Найди зелёную галочку
 
 Сверху список сборок. Нужна строка со статусом **зелёная галочка** (успех).
