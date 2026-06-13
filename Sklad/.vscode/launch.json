@@ -2,8 +2,8 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Flutter: Sklad (Android)",
-      "cwd": "sklad_flutter",
+      "name": "📱 Sklad на телефоне",
+      "cwd": "${workspaceFolder}/sklad_flutter",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart"
