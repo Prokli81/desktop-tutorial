@@ -2,112 +2,64 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Flutter: запустить на телефоне",
+      "label": "📱 Flutter: запустить на телефоне",
       "type": "shell",
       "command": "flutter run",
       "options": {
         "cwd": "${workspaceFolder}/sklad_flutter"
       },
-      "problemMatcher": []
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" },
+      "group": { "kind": "build", "isDefault": true }
     },
     {
-      "label": "Flutter: собрать APK",
+      "label": "📦 Flutter: собрать APK",
       "type": "shell",
-      "command": "${workspaceFolder}\\sobrat-flutter-apk.bat",
-      "windows": {
-        "command": "${workspaceFolder}\\sobrat-flutter-apk.bat"
-      },
+      "command": "flutter build apk --debug",
       "options": {
-        "cwd": "${workspaceFolder}"
+        "cwd": "${workspaceFolder}/sklad_flutter"
       },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
+      "label": "💻 Веб: сервер + браузер",
+      "dependsOrder": "sequence",
+      "dependsOn": ["💻 Веб: сервер", "💻 Веб: открыть браузер"],
       "problemMatcher": []
     },
     {
-      "label": "Sklad: запустить сервер (порт 4174)",
+      "label": "💻 Веб: сервер",
       "type": "shell",
       "command": "python -m http.server 4174",
-      "windows": {
-        "command": "python -m http.server 4174"
-      },
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "isBackground": true,
       "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "focus": false
-      },
-      "group": {
-        "kind": "build",
-        "isDefault": false
-      }
+      "presentation": { "reveal": "always", "panel": "dedicated" }
     },
     {
-      "label": "Sklad: открыть в браузере",
+      "label": "💻 Веб: открыть браузер",
       "type": "shell",
       "command": "start http://localhost:4174",
       "windows": {
         "command": "start http://localhost:4174"
       },
-      "problemMatcher": [],
-      "dependsOn": []
-    },
-    {
-      "label": "Sklad: сервер + браузер",
-      "dependsOrder": "parallel",
-      "dependsOn": [
-        "Sklad: запустить сервер (порт 4174)",
-        "Sklad: открыть в браузере"
-      ],
       "problemMatcher": []
     },
     {
-      "label": "Sklad: npm install",
+      "label": "⚙️ Один раз: установить Flutter",
       "type": "shell",
-      "command": "npm install",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Sklad: синхронизация Android",
-      "type": "shell",
-      "command": "npm run cap:sync",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Sklad: собрать APK",
-      "type": "shell",
-      "command": "${workspaceFolder}\\sobrat-apk.bat",
+      "command": "${workspaceFolder}\\ustanovit-flutter.bat",
       "windows": {
-        "command": "${workspaceFolder}\\sobrat-apk.bat"
+        "command": "${workspaceFolder}\\ustanovit-flutter.bat"
       },
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "problemMatcher": [],
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated"
-      }
-    },
-    {
-      "label": "Sklad: создать папку android",
-      "type": "shell",
-      "command": "${workspaceFolder}\\sozdat-papku-android.bat",
-      "windows": {
-        "command": "${workspaceFolder}\\sozdat-papku-android.bat"
-      },
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "problemMatcher": []
+      "presentation": { "reveal": "always", "panel": "dedicated" }
     }
   ]
 }
