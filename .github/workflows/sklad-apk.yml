@@ -30,6 +30,9 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Accept Android licenses
+        run: yes | flutter doctor --android-licenses || true
+
       - name: Install dependencies
         working-directory: Sklad/sklad_flutter
         run: flutter pub get
