@@ -1,0 +1,46 @@
+name: Build Sklad APK
+
+on:
+  push:
+    branches:
+      - cursor/sklad-warehouse-app-9401
+      - main
+    paths:
+      - "Sklad/sklad_flutter/**"
+      - ".github/workflows/sklad-apk.yml"
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.29.3"
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        working-directory: Sklad/sklad_flutter
+        run: flutter pub get
+
+      - name: Build debug APK
+        working-directory: Sklad/sklad_flutter
+        run: flutter build apk --debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sklad-app-debug
+          path: Sklad/sklad_flutter/build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 30
