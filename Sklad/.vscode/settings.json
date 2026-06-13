@@ -10,7 +10,9 @@
   "liveServer.settings.root": "/",
   "liveServer.settings.donotShowInfoMsg": true,
   "terminal.integrated.defaultProfile.windows": "PowerShell",
-  "files.exclude": {
+  "dart.flutterSdkPath": "C:\\Users\\Grimm\\flutter",
+  "dart.openDevTools": "flutter",
+  "editor.formatOnSave": false,
     "**/node_modules": true,
     "**/www": true,
     "android/.gradle": true,

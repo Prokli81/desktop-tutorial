@@ -28,6 +28,7 @@ VS Code спросит: **Install Recommended Extensions?** → **Install All**
 | Расширение | Зачем |
 |------------|--------|
 | **Russian Language Pack** | Меню на русском |
+| **Flutter** + **Dart** | Разработка на Flutter (будущее) |
 | **Python** | Сервер `python -m http.server` |
 | **Live Server** | Альтернатива серверу (порт 4174) |
 
