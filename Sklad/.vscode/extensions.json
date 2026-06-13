@@ -1,12 +1,8 @@
 {
   "recommendations": [
-    "MS-CEINTL.vscode-language-pack-ru",
     "Dart-Code.flutter",
     "Dart-Code.dart-code",
-    "ms-python.python",
-    "ritwickdey.LiveServer",
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode"
-  ],
-  "unwantedRecommendations": []
+    "MS-CEINTL.vscode-language-pack-ru",
+    "ms-python.python"
+  ]
 }

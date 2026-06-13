@@ -4,11 +4,7 @@
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
   "editor.wordWrap": "on",
-  "editor.formatOnSave": false,
-  "html.format.wrapAttributes": "auto",
-  "liveServer.settings.port": 4174,
-  "liveServer.settings.root": "/",
-  "liveServer.settings.donotShowInfoMsg": true,
+  "workbench.startupEditor": "readme",
   "terminal.integrated.defaultProfile.windows": "PowerShell",
   "dart.flutterSdkPath": "C:\\Users\\Grimm\\flutter",
   "dart.openDevTools": "flutter",
@@ -17,12 +13,14 @@
     "**/www": true,
     "android/.gradle": true,
     "android/app/build": true,
-    "android/build": true
+    "android/build": true,
+    "sklad_flutter/build": true,
+    "sklad_flutter/.dart_tool": true
   },
   "search.exclude": {
     "**/node_modules": true,
     "**/www": true,
     "android/.gradle": true,
-    "android/app/build": true
+    "sklad_flutter/build": true
   }
 }
