@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Sklad">
+  <rect width="128" height="128" rx="24" fill="#0f2744"/>
+  <path d="M24 44h80v52H24z" fill="#1f4f82"/>
+  <path d="M36 56h20v28H36zm36 0h20v28H72z" fill="#7ec8ff"/>
+  <path d="M24 44l40-16 40 16" fill="none" stroke="#c8e7ff" stroke-width="6" stroke-linejoin="round"/>
+</svg>

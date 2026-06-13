@@ -1,0 +1,8 @@
+USB-SKANER SHTRIHKODOV (rekomenduetsya dlya sklada)
+
+1. Podklyuchite skaner v USB na PK
+2. Otkroyte http://localhost:4174 -> Telefon (sklad) ili pole "Kod vruchnuyu"
+3. Kliknite v pole vvoda
+4. Navodite skaner na shtrihkod - kod vstavitsya sam, nazhmite Enter
+
+Ne nuzhny kamera telefona i HTTPS.

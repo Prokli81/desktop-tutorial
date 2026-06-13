@@ -2,9 +2,10 @@
 
 ## Cursor Cloud specific instructions
 
-This repository contains a dependency-free static prototype for **MyFitClub**, a
-private fitness club messenger/community app. The application files live in
-`MyFitClub/`.
+This repository contains separate dependency-free static prototypes (they do not share code or config):
+
+- **MyFitClub** — private fitness club messenger (`MyFitClub/`) — do not modify when working on Sklad
+- **Sklad** — warehouse app for furniture/appliances (`Sklad/`, Flutter in `Sklad/sklad_flutter/`)
 
 - **Dependencies:** None to install. The VM update script can remain a no-op
   (`true`).
@@ -15,9 +16,18 @@ private fitness club messenger/community app. The application files live in
   ```
 
   Then open `http://localhost:4173`.
+
+  **Sklad:**
+
+  ```bash
+  cd Sklad && python3 -m http.server 4174
+  ```
+
+  Then open `http://localhost:4174` (phone + PC modes in one app).
+
 - **Lint / test / build:** There is no package-managed build yet. For basic
-  verification, start the static server from `MyFitClub/` and request
-  `index.html`, `styles.css`, `data-store.js` and `app.js`.
+  verification, start the static server and request `index.html`, `styles.css`,
+  and the project's JS modules (`app.js`, `data-store.js`, etc.).
 - **Git:** Standard `git` operations against `origin` are the development
   workflow.
 

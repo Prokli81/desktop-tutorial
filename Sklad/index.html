@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Sklad — учёт склада мебели и техники" />
+    <meta name="theme-color" content="#0f2744" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Sklad" />
+    <title>Sklad — склад</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="assets/icon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="install-banner hidden" id="install-banner">
+      <p><strong>Установить Sklad</strong> — иконка на главном экране, как приложение.</p>
+      <p class="muted small" id="install-hint">Нужен адрес https:// (см. start-s-kameroy.bat на ПК).</p>
+      <div class="install-actions">
+        <button class="primary-button" type="button" id="install-app">Установить</button>
+        <button class="ghost-button" type="button" id="dismiss-install">Позже</button>
+      </div>
+    </div>
+
+    <div class="role-screen" id="role-screen">
+      <div class="role-card">
+        <div class="brand-mark" aria-hidden="true">S</div>
+        <p class="eyebrow">склад мебели и техники</p>
+        <h1>Sklad</h1>
+        <p class="muted">Выберите, как вы сейчас работаете. Режим можно сменить позже.</p>
+        <div class="role-actions">
+          <button class="primary-button" type="button" data-role="phone">Телефон (склад)</button>
+          <button class="secondary-button" type="button" data-role="pc">ПК (офис)</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="app hidden" id="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">S</div>
+          <div>
+            <p class="eyebrow" id="mode-label">телефон</p>
+            <h1>Sklad</h1>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <span class="sync-badge" id="sync-status">локально</span>
+          <button class="ghost-button" type="button" id="switch-role">Сменить режим</button>
+        </div>
+      </header>
+
+      <main class="phone-layout hidden" id="phone-layout">
+        <section class="panel">
+          <div class="segmented" role="tablist" aria-label="Тип операции">
+            <button class="segmented-item active" type="button" data-invoice-type="in">Приёмка</button>
+            <button class="segmented-item" type="button" data-invoice-type="out">Отгрузка</button>
+          </div>
+          <p class="hint" id="phone-mode-hint">Сканируйте этикетки — позиции попадут в накладную и ждут подтверждения на ПК.</p>
+          <p class="hint camera-https-hint hidden" id="camera-https-hint">
+            Камера на телефоне работает только по <strong>https://</strong>. Откройте ссылку из
+            <code>start-s-kameroy.bat</code> (cloudflared), не <code>http://192.168...</code>.
+          </p>
+        </section>
+
+        <section class="panel scanner-panel">
+          <div id="scanner" class="scanner-box" aria-label="Сканер"></div>
+          <form class="manual-form" id="manual-scan-form">
+            <label>
+              Код вручную
+              <input id="manual-code" type="text" placeholder="KOM-204-DUB" autocomplete="off" />
+            </label>
+            <button class="primary-button" type="submit">Добавить</button>
+          </form>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Текущая накладная</h2>
+            <button class="ghost-button" type="button" id="new-phone-invoice">Новая</button>
+          </div>
+          <p class="muted small" id="active-invoice-meta">—</p>
+          <ul class="line-list" id="phone-lines"></ul>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head">
+            <h2>Мои накладные</h2>
+          </div>
+          <ul class="invoice-list compact" id="phone-invoices"></ul>
+        </section>
+      </main>
+
+      <main class="pc-layout hidden" id="pc-layout">
+        <nav class="side-nav" aria-label="Разделы">
+          <button class="nav-item active" type="button" data-view="dashboard">Обзор</button>
+          <button class="nav-item" type="button" data-view="invoices">Накладные</button>
+          <button class="nav-item" type="button" data-view="stock">Остатки</button>
+          <button class="nav-item" type="button" data-view="catalog">Справочник</button>
+          <button class="nav-item" type="button" data-view="rules">Этикетки</button>
+          <button class="nav-item" type="button" data-view="history">История</button>
+        </nav>
+
+        <div class="pc-content">
+          <section class="view active" id="view-dashboard">
+            <h2>Обзор</h2>
+            <div class="stats-grid" id="stats-grid"></div>
+            <h3>Ожидают подтверждения</h3>
+            <ul class="invoice-list" id="dashboard-pending"></ul>
+          </section>
+
+          <section class="view" id="view-invoices">
+            <div class="split">
+              <div>
+                <h2>Накладные</h2>
+                <ul class="invoice-list" id="pc-invoice-list"></ul>
+              </div>
+              <div class="detail-card hidden" id="invoice-detail">
+                <div class="panel-head">
+                  <h3 id="invoice-detail-title">Накладная</h3>
+                  <span class="badge" id="invoice-detail-badge">ожидает</span>
+                </div>
+                <p class="muted small" id="invoice-detail-meta"></p>
+                <div class="outbound-fields hidden" id="outbound-fields">
+                  <label>
+                    Номер заказа
+                    <input id="field-order" type="text" />
+                  </label>
+                  <label>
+                    Клиент
+                    <input id="field-client" type="text" />
+                  </label>
+                </div>
+                <ul class="line-list" id="invoice-detail-lines"></ul>
+                <div class="action-row">
+                  <button class="danger-button" type="button" id="delete-invoice">Удалить</button>
+                  <button class="primary-button" type="button" id="confirm-invoice">Подтвердить всю накладную</button>
+                </div>
+                <p class="error-text hidden" id="invoice-errors"></p>
+              </div>
+            </div>
+          </section>
+
+          <section class="view" id="view-stock">
+            <div class="panel-head">
+              <h2>Остатки на складе</h2>
+              <input class="search-input" id="stock-search" type="search" placeholder="Поиск по модели, цвету, коду" />
+            </div>
+            <ul class="stock-list" id="stock-list"></ul>
+            <h3>Единицы товара</h3>
+            <ul class="line-list" id="unit-list"></ul>
+          </section>
+
+          <section class="view" id="view-catalog">
+            <div class="panel-head">
+              <h2>Справочник изделий</h2>
+              <input class="search-input" id="catalog-search" type="search" placeholder="Поиск" />
+            </div>
+            <form class="catalog-form" id="product-form">
+              <input type="hidden" id="product-id" />
+              <div class="form-grid">
+                <label>Код типа <input id="product-type" type="text" placeholder="KOM" required /></label>
+                <label>Модель <input id="product-model" type="text" placeholder="204" required /></label>
+                <label>Код цвета <input id="product-color" type="text" placeholder="DUB" required /></label>
+                <label>Название <input id="product-name" type="text" placeholder="Комод 204 дуб" required /></label>
+                <label>
+                  Категория
+                  <select id="product-category">
+                    <option value="мебель">мебель</option>
+                    <option value="техника">техника</option>
+                  </select>
+                </label>
+              </div>
+              <div class="action-row">
+                <button class="secondary-button" type="button" id="product-reset">Очистить</button>
+                <button class="primary-button" type="submit">Сохранить</button>
+              </div>
+            </form>
+            <ul class="catalog-list" id="catalog-list"></ul>
+          </section>
+
+          <section class="view" id="view-rules">
+            <h2>Правила этикеток</h2>
+            <p class="muted">Формат <code>KOM-204-DUB</code>: тип-модель-цвет. Словари можно редактировать.</p>
+            <form id="rules-form" class="rules-form">
+              <label>Разделитель <input id="rule-separator" type="text" maxlength="3" /></label>
+              <label>
+                Словарь типов (JSON)
+                <textarea id="rule-types" rows="6"></textarea>
+              </label>
+              <label>
+                Словарь цветов (JSON)
+                <textarea id="rule-colors" rows="6"></textarea>
+              </label>
+              <button class="primary-button" type="submit">Сохранить правила</button>
+            </form>
+            <div class="preview-box">
+              <label>
+                Проверка кода
+                <input id="rule-preview-code" type="text" placeholder="KOM-204-DUB" />
+              </label>
+              <p id="rule-preview-result" class="muted"></p>
+            </div>
+          </section>
+
+          <section class="view" id="view-history">
+            <h2>История движений</h2>
+            <ul class="history-list" id="history-list"></ul>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <template id="invoice-item-template">
+      <li class="invoice-item">
+        <button type="button" class="invoice-button">
+          <span class="invoice-title"></span>
+          <span class="invoice-meta muted small"></span>
+        </button>
+      </li>
+    </template>
+
+    <script src="firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="label-parser.js"></script>
+    <script src="data-store.js"></script>
+    <script src="cloud-sync.js"></script>
+    <script src="app.js"></script>
+    <script src="pwa-install.js"></script>
+  </body>
+</html>
