@@ -5,7 +5,7 @@
 This repository contains separate dependency-free static prototypes (they do not share code or config):
 
 - **MyFitClub** — private fitness club messenger (`MyFitClub/`) — do not modify when working on Sklad
-- **Sklad** — warehouse app for furniture/appliances (`Sklad/`) — standalone, own Firebase config
+- **Sklad** — warehouse app for furniture/appliances (`Sklad/`, Flutter in `Sklad/sklad_flutter/`)
 
 - **Dependencies:** None to install. The VM update script can remain a no-op
   (`true`).

@@ -1,11 +1,24 @@
 {
   "folders": [
     {
-      "name": "Sklad — склад",
+      "name": "Sklad — веб",
       "path": "."
+    },
+    {
+      "name": "Sklad — Flutter",
+      "path": "sklad_flutter"
     }
   ],
   "settings": {
-    "files.encoding": "utf8"
+    "files.encoding": "utf8",
+    "dart.flutterSdkPath": "C:\\Users\\Grimm\\flutter",
+    "dart.openDevTools": "flutter"
+  },
+  "extensions": {
+    "recommendations": [
+      "Dart-Code.flutter",
+      "Dart-Code.dart-code",
+      "MS-CEINTL.vscode-language-pack-ru"
+    ]
   }
 }

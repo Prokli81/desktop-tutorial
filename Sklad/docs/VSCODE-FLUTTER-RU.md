@@ -1,66 +1,73 @@
-# Flutter + VS Code для Sklad
+# Sklad на Flutter + VS Code
 
-**Важно:** Sklad сейчас — **HTML + Capacitor** (APK уже собирается).  
-**Flutter** — для **будущей** версии приложения. Сначала ставим инструменты.
-
----
-
-## Шаг 1 — установить Flutter SDK (один раз)
-
-`C:\Users\Grimm\sklad` → двойной щелчок **`ustanovit-flutter.bat`**
-
-Скрипт:
-- скачает Flutter (~1 ГБ)
-- распакует в `C:\Users\Grimm\flutter`
-- добавит в PATH
-- запустит `flutter doctor`
-
-**Закройте и откройте VS Code** после установки.
+Приложение **Sklad** в папке `sklad_flutter/` — камера работает **нативно**, без HTTPS-туннеля.
 
 ---
 
-## Шаг 2 — расширения в VS Code
+## Установка (один раз на ПК)
 
-1. Откройте VS Code → папка `C:\Users\Grimm\sklad`
-2. **Ctrl+Shift+X** (расширения)
-3. Установите:
+### 1. Flutter SDK
 
-| Название | ID |
-|----------|-----|
-| **Flutter** | Dart-Code.flutter |
-| **Dart** | Dart-Code.dart-code |
+`C:\Users\Grimm\sklad` → **`ustanovit-flutter.bat`**
 
-Или при запросе **Install Recommended Extensions** → **Install All**.
+### 2. VS Code
 
-4. **Перезапустите VS Code**
+1. Откройте **`sklad.code-workspace`** (двойной щелчок)
+2. Установите расширения **Flutter** и **Dart**
+3. Перезапустите VS Code
 
----
+### 3. Android SDK
 
-## Шаг 3 — проверка
+У вас уже есть Android Studio — достаточно.
 
 **Ctrl+Shift+P** → **Flutter: Run Flutter Doctor**
 
-Должен показать статус (галочки / предупреждения).
+---
 
-Жёлтые предупреждения про Android Studio — **нормально**, Studio у вас уже есть.
+## Работа каждый день в VS Code
+
+| Действие | Как |
+|----------|-----|
+| Открыть проект | `sklad.code-workspace` |
+| Запустить на телефоне | Подключите Android USB → **F5** или `flutter run` |
+| Собрать APK | **`sobrat-flutter-apk.bat`** |
+| Править код | `sklad_flutter/lib/` |
+
+### Терминал VS Code (**Ctrl+`**)
+
+```powershell
+cd sklad_flutter
+flutter pub get
+flutter run
+```
 
 ---
 
-## Шаг 4 — что дальше
+## Структура Flutter
 
-| Сейчас | Flutter позже |
-|--------|----------------|
-| Sklad APK через `sobrat-apk.bat` | Переписать UI на Flutter |
-| VS Code для `app.js`, `index.html` | `flutter create` новый проект |
-
-Когда будете готовы переносить Sklad на Flutter — напишите, начнём новый проект в папке `sklad_flutter`.
+```
+sklad_flutter/
+  lib/
+    main.dart          — запуск
+    screens/           — экраны
+    store.dart         — данные на телефоне
+    label_parser.dart  — KOM-204-DUB
+  android/             — сборка APK
+```
 
 ---
 
-## Если `ustanovit-flutter.bat` долго качает
+## Веб + Flutter вместе
 
-Это нормально (~1 ГБ). Не закрывайте окно.
+| Версия | Где | Зачем |
+|--------|-----|-------|
+| **sklad_flutter** | Телефон (APK) | Скан камерой |
+| **веб Sklad** | ПК localhost:4174 | Подтверждение накладных |
 
-## Если антивирус удалил flutter.bat
+Синхронизация между ними — следующий этап (Firebase).
 
-Добавьте `C:\Users\Grimm\flutter` в исключения антивируса и запустите bat снова.
+---
+
+## Сборка APK без VS Code
+
+`sobrat-flutter-apk.bat` → `app-debug.apk` на телефон.
