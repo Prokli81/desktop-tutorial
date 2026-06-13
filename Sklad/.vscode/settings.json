@@ -1,26 +1,4 @@
 {
   "files.encoding": "utf8",
-  "files.autoGuessEncoding": true,
-  "editor.tabSize": 2,
-  "editor.insertSpaces": true,
-  "editor.wordWrap": "on",
-  "workbench.startupEditor": "readme",
-  "terminal.integrated.defaultProfile.windows": "PowerShell",
-  "dart.flutterSdkPath": "C:\\Users\\Grimm\\flutter",
-  "dart.openDevTools": "flutter",
-  "files.exclude": {
-    "**/node_modules": true,
-    "**/www": true,
-    "android/.gradle": true,
-    "android/app/build": true,
-    "android/build": true,
-    "sklad_flutter/build": true,
-    "sklad_flutter/.dart_tool": true
-  },
-  "search.exclude": {
-    "**/node_modules": true,
-    "**/www": true,
-    "android/.gradle": true,
-    "sklad_flutter/build": true
-  }
+  "terminal.integrated.defaultProfile.windows": "PowerShell"
 }

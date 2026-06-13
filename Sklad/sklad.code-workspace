@@ -11,11 +11,28 @@
   ],
   "settings": {
     "files.encoding": "utf8",
-    "workbench.startupEditor": "readme",
+    "files.autoGuessEncoding": true,
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.wordWrap": "on",
+    "workbench.startupEditor": "none",
+    "window.openWithoutArgumentsInNewWindow": "off",
+    "extensions.autoUpdate": false,
+    "extensions.autoCheckUpdates": false,
+    "extensions.showRecommendationsOnlyOnDemand": true,
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
     "dart.flutterSdkPath": "C:\\Users\\Grimm\\flutter",
     "dart.openDevTools": "flutter",
-    "terminal.integrated.defaultProfile.windows": "PowerShell",
     "files.exclude": {
+      "**/node_modules": true,
+      "**/www": true,
+      "android/.gradle": true,
+      "android/app/build": true,
+      "android/build": true,
+      "sklad_flutter/build": true,
+      "sklad_flutter/.dart_tool": true
+    },
+    "search.exclude": {
       "**/node_modules": true,
       "**/www": true,
       "android/.gradle": true,
@@ -27,6 +44,11 @@
       "Dart-Code.flutter",
       "Dart-Code.dart-code",
       "MS-CEINTL.vscode-language-pack-ru"
+    ],
+    "unwantedRecommendations": [
+      "ritwickdey.LiveServer",
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint"
     ]
   },
   "tasks": {
