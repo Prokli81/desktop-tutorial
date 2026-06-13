@@ -79,6 +79,14 @@
         "options": { "cwd": "${workspaceFolder:Sklad — веб}" },
         "problemMatcher": [],
         "presentation": { "reveal": "always", "panel": "dedicated" }
+      },
+      {
+        "label": "🔄 Обновить с GitHub",
+        "type": "shell",
+        "command": "git pull",
+        "options": { "cwd": "${workspaceFolder:Sklad — веб}" },
+        "problemMatcher": [],
+        "presentation": { "reveal": "always", "panel": "dedicated" }
       }
     ]
   },

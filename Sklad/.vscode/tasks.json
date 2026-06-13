@@ -49,6 +49,16 @@
       "problemMatcher": []
     },
     {
+      "label": "🔄 Обновить с GitHub",
+      "type": "shell",
+      "command": "git pull",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": { "reveal": "always", "panel": "dedicated" }
+    },
+    {
       "label": "⚙️ Один раз: установить Flutter",
       "type": "shell",
       "command": "${workspaceFolder}\\ustanovit-flutter.bat",
