@@ -12,7 +12,7 @@
   "terminal.integrated.defaultProfile.windows": "PowerShell",
   "dart.flutterSdkPath": "C:\\Users\\Grimm\\flutter",
   "dart.openDevTools": "flutter",
-  "editor.formatOnSave": false,
+  "files.exclude": {
     "**/node_modules": true,
     "**/www": true,
     "android/.gradle": true,
