@@ -41,17 +41,7 @@ Write-Host "[4/4] flutter doctor..." -ForegroundColor Cyan
 & "$binPath\flutter.bat" doctor
 
 Write-Host ""
-Write-Host "=== VS Code — ustanovite rasshireniya ===" -ForegroundColor Cyan
-Write-Host "1) Otkroyte VS Code" -ForegroundColor White
-Write-Host "2) Ctrl+Shift+X" -ForegroundColor White
-Write-Host "3) Ustanovite:" -ForegroundColor White
-Write-Host "   - Flutter  (Dart-Code.flutter)" -ForegroundColor Green
-Write-Host "   - Dart     (Dart-Code.dart-code)" -ForegroundColor Green
-Write-Host "4) Perezapustite VS Code" -ForegroundColor White
-Write-Host "5) Ctrl+Shift+P -> Flutter: Run Flutter Doctor" -ForegroundColor White
-Write-Host ""
+Write-Host "=== Gotovo ===" -ForegroundColor Green
+Write-Host "Perezapustite VS Code, zatem F5 ili zadacha Flutter." -ForegroundColor White
 Write-Host "Flutter SDK: $FlutterRoot" -ForegroundColor DarkGray
 Write-Host ""
-Write-Host "Sklad seychas na HTML/Capacitor. Flutter — dlya buduschego portirovaniya." -ForegroundColor Yellow
-Write-Host ""
-Read-Host "Enter"
