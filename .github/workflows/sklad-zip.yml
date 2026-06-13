@@ -1,0 +1,38 @@
+name: Package Sklad (only)
+
+on:
+  push:
+    branches:
+      - cursor/sklad-warehouse-app-9401
+      - main
+    paths:
+      - "Sklad/**"
+      - ".github/workflows/sklad-zip.yml"
+  workflow_dispatch:
+
+jobs:
+  package-sklad:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create Sklad-only ZIP
+        run: |
+          cd Sklad
+          zip -r ../sklad-project.zip . \
+            -x "node_modules/*" \
+            -x "www/*" \
+            -x "android/.gradle/*" \
+            -x "android/app/build/*" \
+            -x "android/build/*" \
+            -x "sklad_flutter/build/*" \
+            -x "sklad_flutter/.dart_tool/*" \
+            -x "**/.git/*"
+
+      - name: Upload Sklad ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: sklad-project
+          path: sklad-project.zip
+          retention-days: 30

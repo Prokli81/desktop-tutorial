@@ -1,7 +1,6 @@
-Нет файлов или не знаешь как обновить с GitHub?
+Нет файлов? Скачай ТОЛЬКО Sklad (без MyFitClub):
 
     Открой: СКАЧАТЬ-С-GITHUB.md
 
-Или в браузере:
-https://github.com/Prokli81/desktop-tutorial/tree/cursor/sklad-warehouse-app-9401
-→ Code → Download ZIP
+Или в браузере (архив без MyFitClub):
+https://github.com/Prokli81/desktop-tutorial/actions/workflows/sklad-zip.yml
