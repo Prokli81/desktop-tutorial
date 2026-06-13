@@ -1,0 +1,92 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Sklad: запустить сервер (порт 4174)",
+      "type": "shell",
+      "command": "python -m http.server 4174",
+      "windows": {
+        "command": "python -m http.server 4174"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "focus": false
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
+      "label": "Sklad: открыть в браузере",
+      "type": "shell",
+      "command": "start http://localhost:4174",
+      "windows": {
+        "command": "start http://localhost:4174"
+      },
+      "problemMatcher": [],
+      "dependsOn": []
+    },
+    {
+      "label": "Sklad: сервер + браузер",
+      "dependsOrder": "parallel",
+      "dependsOn": [
+        "Sklad: запустить сервер (порт 4174)",
+        "Sklad: открыть в браузере"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Sklad: npm install",
+      "type": "shell",
+      "command": "npm install",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Sklad: синхронизация Android",
+      "type": "shell",
+      "command": "npm run cap:sync",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Sklad: собрать APK",
+      "type": "shell",
+      "command": "${workspaceFolder}\\sobrat-apk.bat",
+      "windows": {
+        "command": "${workspaceFolder}\\sobrat-apk.bat"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Sklad: создать папку android",
+      "type": "shell",
+      "command": "${workspaceFolder}\\sozdat-papku-android.bat",
+      "windows": {
+        "command": "${workspaceFolder}\\sozdat-papku-android.bat"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

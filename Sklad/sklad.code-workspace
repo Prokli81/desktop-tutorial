@@ -1,0 +1,11 @@
+{
+  "folders": [
+    {
+      "name": "Sklad — склад",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.encoding": "utf8"
+  }
+}

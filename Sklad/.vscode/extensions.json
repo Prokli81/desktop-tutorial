@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "MS-CEINTL.vscode-language-pack-ru",
+    "ms-python.python",
+    "ritwickdey.LiveServer",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode"
+  ],
+  "unwantedRecommendations": []
+}
